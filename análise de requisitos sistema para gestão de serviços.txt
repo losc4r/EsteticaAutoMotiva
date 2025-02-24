@@ -1,0 +1,18 @@
+1. Cadastro de Clientes
+Nome completo | CPF/CNPJ | Endereço | Telefone e e-mail
+
+2. Cadastro de Veiculos
+Modelo | ano | cor | tipo | placa
+
+3. Emissão da Ordem de Serviço (OS)
+Número da OS (gerado automaticamente) | Data e hora da abertura (gerado automaticamente) | Dados do cliente (puxar do cadastro de clientes)
+Serviço Solicitado:
+Prazo de Conclusão:
+Status do Serviço: (Aberta, Em andamento, Finalizada, Cancelada)
+
+4. Funcionário
+Nome completo | CPF/CNPJ | Endereço | Telefone e e-mail | Cargo | Horário de Serviço
+
+- Relatórios:
+Serviço realizado
+Faturamento
