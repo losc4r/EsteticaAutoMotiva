@@ -71,10 +71,12 @@ const template = [
         label: 'Clientes'
       },
       {
-        label: 'OS'
+        label: 'Veículos'
       },
       {
-        type: 'separator'
+        label: 'Ordem de Serviço'
+      },
+      { label: 'Funcionários'
       },
       {
         label: 'Sair',
@@ -83,8 +85,16 @@ const template = [
       }
     ]
   },
-  {
-    label: 'Relatórios'
+    {
+    label: 'Relatórios',
+    submenu: [
+      {
+        label: 'Serviços Realizados'
+      },
+      {
+        label: 'Faturamento'
+      },
+    ]
   },
   {
     label: 'Ferramentas',

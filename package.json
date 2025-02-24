@@ -1,5 +1,5 @@
 {
-  "name": "losc4r_ti",
+  "name": "Estética Auto Motiva",
   "version": "1.0.0",
   "description": "Desenvolvimento de um sistema desktop para uma gestão de ordem de serviços",
   "main": "main.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/losc4r/losc4r_ti.git"
+    "url": "git+https://github.com/losc4r/EsteticaAutoMotiva.git"
   },
   "author": "Carlos Antonio",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/losc4r/losc4r_ti/issues"
+    "url": "https://github.com/losc4r/EsteticaAutoMotiva/issues"
   },
-  "homepage": "https://github.com/losc4r/losc4r_ti#readme",
+  "homepage": "https://github.com/losc4r/EsteticaAutoMotiva#readme",
   "devDependencies": {
     "electron": "^34.2.0"
   }
