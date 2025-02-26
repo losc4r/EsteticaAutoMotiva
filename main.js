@@ -1,6 +1,7 @@
 console.log("Processo principal")
 
-const { app, BrowserWindow, nativeTheme, Menu } = require('electron')
+const { app, BrowserWindow, nativeTheme, Menu, ipcMain } = require('electron')
+const path = require('node:path')
 
 // Janela principal
 let win
@@ -19,6 +20,23 @@ const createWindow = () => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 
   win.loadFile('./src/views/index.html')
+
+  // recebimento dos pedidos para abertura de janelas (botões) autorizado no preload.js
+  ipcMain.on('client-window', () => {
+    clientWindow()
+  })
+
+  ipcMain.on('veiculo-window', () => {
+    osWindow()
+  })
+
+  ipcMain.on('os-window', () => {
+    osWindow()
+  })
+
+  ipcMain.on('funcionario-window', () => {
+    osWindow()
+  })
 }
 
 // Janela Sobre
@@ -41,6 +59,87 @@ function aboutWindow() {
   }
   about.loadFile('./src/views/sobre.html')
 }
+
+// JANELA CLIENTES
+
+let client
+function clientWindow() {
+  nativeTheme.themeSource = 'light'
+  const main = BrowserWindow.getFocusedWindow()
+  if (main) {
+    client = new BrowserWindow({
+      width: 1020,
+      heigth: 720,
+      //autoHideMenuBar: true,
+      resizable: false,
+      parent: main,
+      modal: true
+    })
+  }
+  client.loadFile('./src/views/clientes.html')
+  client.center() //inicar no centro da tela
+}
+
+// JANELA VEICULO
+
+let veiculo
+function veiculoWindow() {
+  nativeTheme.themeSource = 'light'
+  const main = BrowserWindow.getFocusedWindow()
+  if (main) {
+    veiculo = new BrowserWindow({
+      width: 1020,
+      heigth: 720,
+      //autoHideMenuBar: true,
+      resizable: false,
+      parent: main,
+      modal: true
+    })
+  }
+  veiculo.loadFile('./src/views/veiculo.html')
+  veiculo.center() //inicar no centro da tela
+}
+
+// JANELA OS
+
+let os
+function osWindow() {
+  nativeTheme.themeSource = 'light'
+  const main = BrowserWindow.getFocusedWindow()
+  if (main) {
+    os = new BrowserWindow({
+      width: 1020,
+      heigth: 720,
+      //autoHideMenuBar: true,
+      resizable: false,
+      parent: main,
+      modal: true
+    })
+  }
+  os.loadFile('./src/views/os.html')
+  os.center() //inicar no centro da tela
+}
+
+// JANELA FUNCIONARIO
+
+let funcionario
+function funcionarioWindow() {
+  nativeTheme.themeSource = 'light'
+  const main = BrowserWindow.getFocusedWindow()
+  if (main) {
+    funcionario = new BrowserWindow({
+      width: 1020,
+      heigth: 720,
+      //autoHideMenuBar: true,
+      resizable: false,
+      parent: main,
+      modal: true
+    })
+  }
+  funcionario.loadFile('./src/views/funcionario.html')
+  funcionario.center() //inicar no centro da tela
+}
+
 
 // Iniciar a aplicação
 app.whenReady().then(() => {
@@ -68,15 +167,19 @@ const template = [
     label: 'Cadastro',
     submenu: [
       {
-        label: 'Clientes'
+        label: 'Clientes',
+        click: () => clientWindow()
       },
       {
-        label: 'Veículos'
+        label: 'Veículos',
+        click: () => veiculoWindow()
       },
       {
-        label: 'Ordem de Serviço'
+        label: 'Ordem de Serviço',
+        click: () => osWindow()
       },
-      { label: 'Funcionários'
+      { label: 'Funcionários',
+        click: () => funcionarioWindow()
       },
       {
         label: 'Sair',
