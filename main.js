@@ -13,7 +13,11 @@ const createWindow = () => {
     height: 600,
     //autoHideMenuBar: true,
     //minimizable: false,
-    resizable: false
+    resizable: false,
+    //ativação do preload
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js')
+    }
   })
 
   // menu personalizado
@@ -27,7 +31,7 @@ const createWindow = () => {
   })
 
   ipcMain.on('veiculo-window', () => {
-    osWindow()
+    veiculoWindow() // Corrigido
   })
 
   ipcMain.on('os-window', () => {
@@ -35,7 +39,7 @@ const createWindow = () => {
   })
 
   ipcMain.on('funcionario-window', () => {
-    osWindow()
+    funcionarioWindow() // Corrigido
   })
 }
 
@@ -88,8 +92,8 @@ function veiculoWindow() {
   const main = BrowserWindow.getFocusedWindow()
   if (main) {
     veiculo = new BrowserWindow({
-      width: 1020,
-      heigth: 720,
+      width: 800,
+      heigth: 800,
       //autoHideMenuBar: true,
       resizable: false,
       parent: main,
@@ -178,7 +182,8 @@ const template = [
         label: 'Ordem de Serviço',
         click: () => osWindow()
       },
-      { label: 'Funcionários',
+      {
+        label: 'Funcionários',
         click: () => funcionarioWindow()
       },
       {
@@ -188,7 +193,7 @@ const template = [
       }
     ]
   },
-    {
+  {
     label: 'Relatórios',
     submenu: [
       {
