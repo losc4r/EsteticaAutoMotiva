@@ -7,7 +7,7 @@
 <!-- Bootstrap -->
 <link rel="stylesheet" href="../public/css/bootstrap.min.css">
 <!-- CSS Personalizado -->
-<link rel="stylesheet" href="../public/css/style.css">
+<link rel="stylesheet" href="../public/css/style1.css">
 <!-- Impedir a execução de scripts externos ou não autorizados -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'">
 </head>
@@ -46,12 +46,13 @@
             <!-- CEP -->
             <div class="col-md-2">
                 <label for="inputCEPClient" class="form-label">CEP</label>
-                <input type="text" class="form-control" id="inputCEPClient" spellcheck="false" maxlength="15">
+                <input type="text" class="form-control" id="inputCEPClient" spellcheck="false" required onblur="buscarCEP()"
+                maxlength="15">
             </div>
             <!-- Logradouro -->
             <div class="col-md-5">
-                <label for="inputAddresseClient" class="form-label">Endereço</label>
-                <input type="text" class="form-control" id="inputAdressClient" spellcheck="false" required maxlength="40">
+                <label for="inputAddressClient" class="form-label">Endereço</label>
+                <input type="text" class="form-control" id="inputAddressClient" spellcheck="false" required maxlength="40">
             </div>
             <!-- Número -->
             <div class="col-md-1">
@@ -65,18 +66,18 @@
             </div>
             <!-- Bairro -->
             <div class="col-md-3">
-                <label for="inputNeighborhoodClient" class="form-label">Bairro</label>
-                <input type="text" class="form-control" id="inputNeighborhoodClient" spellcheck="false" maxlength="20">
+                <label for="inputBairroClient" class="form-label">Bairro</label>
+                <input type="text" class="form-control" id="inputBairroClient" spellcheck="false" maxlength="20">
             </div>
             <!-- Cidade -->
             <div class="col-md-3">
-                <label for="inputCityClient" class="form-label">Cidade</label>
-                <input type="text" class="form-control" id="inputCityClient" spellcheck="false" maxlength="30">
+                <label for="inputCidadeClient" class="form-label">Cidade</label>
+                <input type="text" class="form-control" id="inputCidadeClient" spellcheck="false" maxlength="30">
             </div>
             <!-- UF -->
              <div class="col-md-2">
-                <label for="uf" class="form-label">U.F</label>
-            <select class="form-select" id="uf" name="uf">
+                <label for="inputUFclientclass="form-label">U.F</label>
+            <select class="form-select" id="inputUFclient" name="uf">
                 <option value="">SELECIONE</option>
                 <option value="AC">AC</option>
                 <option value="AL">AL</option>
@@ -117,6 +118,9 @@
              </div>
         </form>
     </div>
+
+    <!-- Renderizador -->
+     <script src="rendererClient.js"></script>
 
     <!-- Bootstrap -->
     <script src="../public/js/bootstrap.min.js"></script>

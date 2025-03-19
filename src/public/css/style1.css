@@ -1,0 +1,13 @@
+body {
+    background-color: aliceblue;
+}
+
+/* Botão reset */
+#btnReset {
+    width: 24px;
+    height: 24px;
+    background-image: url(../img/vassoura.png);
+    border: none;
+    cursor: pointer;
+    margin-left: 10px;
+}
