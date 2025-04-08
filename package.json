@@ -19,5 +19,9 @@
   "homepage": "https://github.com/losc4r/EsteticaAutoMotiva#readme",
   "devDependencies": {
     "electron": "^34.2.0"
+  },
+  "dependencies": {
+    "jspdf": "^3.0.1",
+    "mongoose": "^8.13.0"
   }
 }

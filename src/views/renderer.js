@@ -28,3 +28,15 @@ function funcionario() {
     //uso da api(autorizada no preload.js)
     api.funcionarioWindow()
 }
+
+// troca do icone do banco de dados (usando a api do preload.js)
+api.dbStatus((event, message) => {
+    // teste do recebimento da mensagem
+    console.log(message)
+    if (message === "conectado") {
+        document.getElementById('statusdb').src = "../public/img/dbon.png"
+    } else {
+        document.getElementById('statusdb').src = "../public/img/dboff.png"
+    }
+}
+)
