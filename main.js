@@ -11,6 +11,7 @@ const { conectar, desconectar } = require('./database.js')
 // importação do Schema Clientes da camada model
 const clientModel = require('./src/models/clientes.js')
 const clientes = require('./src/models/clientes.js')
+const oss = require('./src/models/os.js')
 
 // importação do pacote jspdf (npm i jspdf)
 const { jspdf, default: jsPDF } = require('jspdf')
@@ -340,7 +341,6 @@ ipcMain.on('new-client', async (event, client) => {
   }
 })
 // == Fim - Cliente - CRUD Create
-
 // =========== Relatório de Cliente ============
 
 async function relatorioClientes() {
@@ -411,7 +411,7 @@ async function relatorioClientes() {
     for (let i = 1; i <= paginas; i++) {
       doc.setPage(i)
       doc.setFontSize(10)
-      doc.text(`Página ${i} de ${paginas}`, 105, 290, {align:'center'})
+      doc.text(`Página ${i} de ${paginas}`, 105, 290, { align: 'center' })
     }
 
     // Definir o caminho do arquivo temporário e nome do arquivo
@@ -429,3 +429,39 @@ async function relatorioClientes() {
 }
 
 // =========== FIM Relatório de Cliente =============
+
+// ==========================
+// == O.S - CRUD Create
+
+ipcMain.on('new-os', async (event, os) => {
+  console.log(os)
+
+  try {
+    const newOs = new osModel({
+      servicoOS: os.servicoOs,
+      prazoOS: os.prazoOs,
+      statusOS: os.statusOs,
+      valorOS: os.valorOs,
+    })
+
+    await newOs.save()
+
+    dialog.showMessageBox({
+      type: 'info',
+      title: "Aviso",
+      message: "O.S adicionada com sucesso",
+      buttons: ['OK']
+    }).then((result) => {
+      if (result.response === 0) {
+        event.reply('reset-form')
+      }
+    })
+
+  } catch (error) {
+    console.error('Erro ao salvar O.S:', error)
+    dialog.showErrorBox('Erro', 'Não foi possível salvar a O.S.')
+  }
+})
+
+
+
