@@ -110,8 +110,8 @@ function osWindow() {
       resizable: false,
       parent: main,
       modal: true,
-            //ativação do preload.js
-            webPreferences: {
+      //ativação do preload.js
+      webPreferences: {
         preload: path.join(__dirname, 'preload.js')
       }
     })
@@ -376,6 +376,30 @@ async function relatorioClientes() {
 }
 
 // =========== FIM Relatório de Cliente =============
+
+// =========== CRUD READ ============================
+
+ipcMain.on('search-name', async (event, name) => {
+  //console.log("teste IPC search-name")
+  //console.log(name) // teste do passo 2 (importante)
+  // passo 3 e 4 busca dos dados do cliente do banco
+  // find ({nomeCliente: name}) - buscar pelo nome
+  // RegExp(name, i) - i (insensitive / ignorar maiusculo ou minusculo)
+  try {
+    const dataClient = await clientModel.find({
+      nomeCliente: new RegExp(name, 'i')
+    })
+    console.log(dataClient) // teste passos 3 e 4 (importante)
+    // passo 5
+    // enviando os dados cliente ao rendererCliente
+    // OBS: IPC só trabalha com string, então é necessário converter o JSON para o string
+    event.reply ('render-client', JSON.stringify(dataClient))
+  } catch (error) {
+    console.log(error)
+  }
+})
+
+// =========== FIM CRUD READ ========================
 
 // =========== CRUD OS ==============================
 
