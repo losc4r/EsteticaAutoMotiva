@@ -9,18 +9,18 @@
     <link rel="stylesheet" href="../public/css/bootstrap.min.css">
 
     <!-- CSS personalizado -->
-    <link rel="stylesheet" href="../public/css/style1.css">
+    <link rel="stylesheet" href="../public/css/style2.css">
 
     <!-- Impedir a execução de scripts externos ou não autorizados -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' ">
 
-    <link rel="stylesheet" href="style1.css">
+    <link rel="stylesheet" href="../public/css/style2.css">
 </head>
 
 <body>
     <div class="container">
         <h1 class="d-flex justify-content-center mb-4"></h1>
-        <form id="frmOs" class="mt-2 row g-3">
+        <form id="frmOS" class="mt-2 row g-3">
 
             <!-- Número da OS -->
             <div class="col-md-2">
@@ -40,9 +40,9 @@
                     Buscar Clientes
                 </label>
                 <div class="d-flex">
-                    <input type="text" class="form-control" id="searchClientOs" maxlength="30" spellcheck="false">
+                    <input type="text" class="form-control" id="searchOS" maxlength="30" spellcheck="false">
                     <button type="button" class="btn btn-dark ml-2" id="btnRead"
-                        onclick="searchClientOs()">Buscar</button>
+                        onclick="searchOS()"> Buscar</button>
                 </div>
 
             </div>
@@ -78,28 +78,33 @@
                 <input type="text" class="form-control" id="inputDadosOS" spellcheck="false" maxlength="30">
             </div>
 
+            <!-- Modelo do Veiculo  -->
+            <div class="col-md-3">
+                <label for="inputModeloVeiculoOS" class="form-label">Modelo Veiculo</label>
+                <input type="text" class="form-control" id="inputModeloVeiculoOS" spellcheck="false" maxlength="30">
+            </div>
+
+            <!-- Placa  -->
+            <div class="col-md-2">
+                <label for="inputPlacaVeiculoOS" class="form-label">Placa Veiculo</label>
+                <input type="text" class="form-control" id="inputPlacaVeiculoOS" spellcheck="false" maxlength="9">
+            </div>
+
             <!-- Prazo  -->
             <div class="col-md-2">
                 <label for="inputPrazoOS" class="form-label">Prazo</label>
                 <input type="text" class="form-control" id="inputPrazoOS" spellcheck="false" required maxlength="15">
             </div>
 
-            <!-- Status da OS  -->
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <label for="inputStatusOS" class="form-label">Status da OS</label>
-                <select required class="form-select" id="inputStatusOS" name="OS">
-                    <option value=""></option>
-                    <option value="">Pendente</option>
-                    <option value="">Em andamento</option>
-                    <option value="">Concluída</option>
-                    <option value="">Cancelada</option>
-                </select>
+                <input type="text" class="form-control" id="inputStatusOS" spellcheck="false" required maxlength="15">
             </div>
 
             <!-- Valor -->
             <div class="col-md-2">
-                <label for="inputDadosOS" class="form-label">Valor Total</label>
-                <input type="text" class="form-control" id="inputDadosOS" spellcheck="false" maxlength="30"
+                <label for="inputValorOS" class="form-label">Valor Total</label>
+                <input type="text" class="form-control" id="inputValorOS" spellcheck="false" maxlength="30"
                     onkeyup="formatarMoeda(this)">
             </div>
 
@@ -128,6 +133,8 @@
             input.value = valor;
         }
     </script>
+
+<script src="rendererOs.js"></script>
 </body>
 
 </html>

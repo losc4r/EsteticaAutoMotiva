@@ -10,8 +10,9 @@ const { conectar, desconectar } = require('./database.js')
 
 // importação do Schema Clientes da camada model
 const clientModel = require('./src/models/clientes.js')
-const clientes = require('./src/models/clientes.js')
-const oss = require('./src/models/os.js')
+
+//Importação do modelo de dados do os
+const osModel = require("./src/models/os.js")
 
 // importação do pacote jspdf (npm i jspdf)
 const { jspdf, default: jsPDF } = require('jspdf')
@@ -45,17 +46,8 @@ const createWindow = () => {
   ipcMain.on('client-window', () => {
     clientWindow()
   })
-
-  ipcMain.on('veiculo-window', () => {
-    veiculoWindow() // Corrigido
-  })
-
   ipcMain.on('os-window', () => {
     osWindow()
-  })
-
-  ipcMain.on('funcionario-window', () => {
-    funcionarioWindow() // Corrigido
   })
 }
 
@@ -104,26 +96,6 @@ function clientWindow() {
   client.center() //inicar no centro da tela
 }
 
-// JANELA VEICULO
-
-let veiculo
-function veiculoWindow() {
-  nativeTheme.themeSource = 'light'
-  const main = BrowserWindow.getFocusedWindow()
-  if (main) {
-    veiculo = new BrowserWindow({
-      width: 800,
-      heigth: 800,
-      //autoHideMenuBar: true,
-      resizable: false,
-      parent: main,
-      modal: true
-    })
-  }
-  veiculo.loadFile('./src/views/veiculo.html')
-  veiculo.center() //inicar no centro da tela
-}
-
 // JANELA OS
 
 let os
@@ -137,33 +109,16 @@ function osWindow() {
       //autoHideMenuBar: true,
       resizable: false,
       parent: main,
-      modal: true
+      modal: true,
+            //ativação do preload.js
+            webPreferences: {
+        preload: path.join(__dirname, 'preload.js')
+      }
     })
   }
   os.loadFile('./src/views/os.html')
   os.center() //inicar no centro da tela
 }
-
-// JANELA FUNCIONARIO
-
-let funcionario
-function funcionarioWindow() {
-  nativeTheme.themeSource = 'light'
-  const main = BrowserWindow.getFocusedWindow()
-  if (main) {
-    funcionario = new BrowserWindow({
-      width: 1020,
-      heigth: 720,
-      //autoHideMenuBar: true,
-      resizable: false,
-      parent: main,
-      modal: true
-    })
-  }
-  funcionario.loadFile('./src/views/funcionario.html')
-  funcionario.center() //inicar no centro da tela
-}
-
 
 // Iniciar a aplicação
 app.whenReady().then(() => {
@@ -213,16 +168,8 @@ const template = [
         click: () => clientWindow()
       },
       {
-        label: 'Veículos',
-        click: () => veiculoWindow()
-      },
-      {
         label: 'Ordem de Serviço',
         click: () => osWindow()
-      },
-      {
-        label: 'Funcionários',
-        click: () => funcionarioWindow()
       },
       {
         label: 'Sair',
@@ -430,38 +377,34 @@ async function relatorioClientes() {
 
 // =========== FIM Relatório de Cliente =============
 
-// ==========================
-// == O.S - CRUD Create
+// =========== CRUD OS ==============================
 
 ipcMain.on('new-os', async (event, os) => {
   console.log(os)
-
   try {
     const newOs = new osModel({
-      servicoOS: os.servicoOs,
-      prazoOS: os.prazoOs,
-      statusOS: os.statusOs,
-      valorOS: os.valorOs,
-    })
 
+      servicooS: os.servicoOS,
+      modelooS: os.modeloOS,
+      placaoS: os.placaOS,
+      prazooS: os.prazoOS,
+      statusoS: os.statusOS,
+      valoroS: os.valorOS
+
+    })
     await newOs.save()
 
     dialog.showMessageBox({
       type: 'info',
       title: "Aviso",
-      message: "O.S adicionada com sucesso",
+      message: "Ordem de Serviço Adicionada!!!",
       buttons: ['OK']
     }).then((result) => {
       if (result.response === 0) {
         event.reply('reset-form')
       }
     })
-
   } catch (error) {
-    console.error('Erro ao salvar O.S:', error)
-    dialog.showErrorBox('Erro', 'Não foi possível salvar a O.S.')
+    console.error('Erro ao salvar OS:', error);
   }
 })
-
-
-

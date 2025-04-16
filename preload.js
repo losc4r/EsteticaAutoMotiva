@@ -12,12 +12,11 @@ ipcRenderer.send('db-connect')
 // expor (autorizar a comunicação entre processos)
 contextBridge.exposeInMainWorld('api', {
     clientWindow: () => ipcRenderer.send('client-window'),
-    veiculoWindow: () => ipcRenderer.send('veiculo-window'),
     osWindow: () => ipcRenderer.send('os-window'),
-    funcionarioWindow: () => ipcRenderer.send('funcionario-window'),
     dbStatus: (message) => ipcRenderer.on('db-status', message),
     newClient: (client) => ipcRenderer.send('new-client', client),
-    resetForm: (args) => ipcRenderer.on('reset-form', args)
+    resetForm: (args) => ipcRenderer.on('reset-form', args),
+    newOs: (os) => ipcRenderer.send('new-os', os)
 })
 
 function dbStatus(message) {

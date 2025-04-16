@@ -11,22 +11,10 @@ function client() {
     api.clientWindow()
 }
 
-function veiculo() {
-    //console.log("teste")
-    //uso da api(autorizada no preload.js)
-    api.veiculoWindow()
-}
-
 function os() {
     //console.log("teste")
     //uso da api(autorizada no preload.js)
     api.osWindow()
-}
-
-function funcionario() {
-    //console.log("teste")
-    //uso da api(autorizada no preload.js)
-    api.funcionarioWindow()
 }
 
 // troca do icone do banco de dados (usando a api do preload.js)

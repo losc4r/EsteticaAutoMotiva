@@ -7,6 +7,7 @@
     border: 5px solid #e8e8e8;
     cursor: pointer;
     border-radius: 15%;
+    width: 200px;
     
 }
 
@@ -61,4 +62,10 @@ footer p {
 
 body {
     background-color: #0258bb;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
