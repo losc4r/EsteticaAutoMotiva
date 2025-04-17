@@ -10,6 +10,7 @@ const { conectar, desconectar } = require('./database.js')
 
 // importação do Schema Clientes da camada model
 const clientModel = require('./src/models/clientes.js')
+const cpfModel = require('./src/models/clientes.js')
 
 //Importação do modelo de dados do os
 const osModel = require("./src/models/os.js")
@@ -386,8 +387,11 @@ ipcMain.on('search-name', async (event, name) => {
   // find ({nomeCliente: name}) - buscar pelo nome
   // RegExp(name, i) - i (insensitive / ignorar maiusculo ou minusculo)
   try {
-    const dataClient = await clientModel.find({
-      nomeCliente: new RegExp(name, 'i')
+    const dataClient  = await clientModel.find({
+      $or: [
+        { nomeClient: new RegExp(name, 'i') },
+        { cpfCliente: new RegExp(name, 'i') }
+      ]
     })
     console.log(dataClient) // teste passos 3 e 4 (importante)
     // passo 5

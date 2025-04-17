@@ -18,7 +18,7 @@ contextBridge.exposeInMainWorld('api', {
     resetForm: (args) => ipcRenderer.on('reset-form', args),
     newOs: (os) => ipcRenderer.send('new-os', os),
     searchName: (name) => ipcRenderer.send('search-name', name),
-    renderClient: (dataClient) => ipcRenderer.on('render-client', dataClient)
+    renderClient: (dataClient) => ipcRenderer.on('render-client', dataClient),
 })
 
 function dbStatus(message) {

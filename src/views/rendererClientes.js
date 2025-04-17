@@ -109,7 +109,6 @@ function buscarCliente() {
         ufClient.value = c.ufCliente
     })
   })
-
 }
 
 // ========= Fim CRUD Read ============
