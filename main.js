@@ -380,6 +380,16 @@ async function relatorioClientes() {
 
 // =========== CRUD READ ============================
 
+// validação de busca (preenchimento obrigatório)
+ipcMain.on('validate-search', () => {
+  dialog.showMessageBox({
+    type: 'warning',
+    title: "Atenção",
+    message: "Preencha o campo de busca",
+    buttons: ['OK']
+  })
+})
+
 ipcMain.on('search-name', async (event, name) => {
   //console.log("teste IPC search-name")
   //console.log(name) // teste do passo 2 (importante)
@@ -389,11 +399,35 @@ ipcMain.on('search-name', async (event, name) => {
   try {
     const dataClient  = await clientModel.find({
       $or: [
-        { nomeClient: new RegExp(name, 'i') },
+        { nomeCliente: new RegExp(name, 'i') },
         { cpfCliente: new RegExp(name, 'i') }
       ]
     })
     console.log(dataClient) // teste passos 3 e 4 (importante)
+    // melhoria da expriência do usuário (se o cliente não estiver cadastrado, alertar o usuário e questionar se ele quer cadastrar este novo cliente.Se não quiser cadastrar, limpar os campos, se quiser cadastrar recortar o nome do cliente do campo de busca e colar no campo nome)
+
+    // se o vetor estiver vazio [] (cliente não cadastrado)
+    if (dataClient.length === 0) {
+      dialog.showMessageBox({
+        type: 'question',
+        title: 'Aviso',
+        message: "Cliente não cadastrado. \nDeseja cadastrar esse cliente?",
+        defaultId: 0, //botão 0
+        buttons: ['Sim', 'Não'] //[0,1]
+
+      }).then((result) => {
+        if (result.response === 0) {
+          // enviar ao renderizador um pedido para setar os campos(recortar do campo de busca e colar no campo nome
+          event.reply('set-client')
+        } else {
+          // limpar formulario
+          event.reply('reset-form')
+        }
+
+      })
+    }
+
+
     // passo 5
     // enviando os dados cliente ao rendererCliente
     // OBS: IPC só trabalha com string, então é necessário converter o JSON para o string

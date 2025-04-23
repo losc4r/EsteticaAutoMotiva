@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('api', {
     newOs: (os) => ipcRenderer.send('new-os', os),
     searchName: (name) => ipcRenderer.send('search-name', name),
     renderClient: (dataClient) => ipcRenderer.on('render-client', dataClient),
+    validateSearch: () => ipcRenderer.send('validate-search'),
+    setClient: (args) => ipcRenderer.on('set-client', args)
 })
 
 function dbStatus(message) {

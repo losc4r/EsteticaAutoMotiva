@@ -19,11 +19,11 @@ const clienteSchema = new Schema({
     },
 
     emailCliente: {
-        type: String
+        type: String,
     },
 
     foneCliente: {
-        type: String
+        type: String,
     },
 
     cepCliente: {
