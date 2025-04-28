@@ -48,6 +48,9 @@ let bairroClient = document.getElementById('inputBairroClient')
 let cityClient = document.getElementById('inputCidadeClient')
 let ufClient = document.getElementById('inputUFClient')
 
+// captura do Id do Cliente (usado no delete/update)
+let id = document.getElementById('idClient')
+
 // ===============================
 // = CRUD Create/Update ===============
 
@@ -131,7 +134,8 @@ function buscarCliente() {
       arrayClient = dadosCliente
       // extrair os dados do cliente
       arrayClient.forEach((c) => {
-        nameClient.value = c.nomeCliente,
+          id.value = c._id,
+          nameClient.value = c.nomeCliente,
           cpfClient.value = c.cpfCliente,
           emailClient.value = c.emailCliente,
           phoneClient.value = c.foneCliente,
@@ -142,6 +146,13 @@ function buscarCliente() {
           bairroClient.value = c.bairroCliente,
           cityClient.value = c.cidadeCliente,
           ufClient.value = c.ufCliente
+
+          // bloqueio do botão adicionar
+          btnCreate.disabled = true
+          // desbloqueio dos botões editar e excluir
+          btnUpdate.disabled = false
+          btnDelete.disabled = false
+
       })
     })
   }
@@ -166,6 +177,15 @@ if (/^\d+$/.test(campoBusca)) {
 })
 
 // ========= Fim CRUD Read ============
+
+// ========= CRUD Delete ===============
+
+function excluirCliente(){
+  console.log(id.value) // Passo 1 * (receber do form o id do cliente)
+  api.deleteClient(id.value) // Passo 2 * (enviar o id ao main)
+}
+
+// ========= Fim CRUD Delete ============
 
 // =================== Reset Form ============ //
 

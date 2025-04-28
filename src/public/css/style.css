@@ -33,6 +33,11 @@
     margin-left: 10px;
 }
 
+/* Ocultar o campo Id do cliente */
+#idCliente {
+    display: none;
+}
+
 /* Rodapé */
 footer {
     background-color: #003c80;

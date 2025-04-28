@@ -11,3 +11,8 @@ body {
     cursor: pointer;
     margin-left: 10px;
 }
+
+/* Ocultar o campo Id do cliente */
+#idClient {
+    display: none;
+}

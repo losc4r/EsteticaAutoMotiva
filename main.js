@@ -439,6 +439,32 @@ ipcMain.on('search-name', async (event, name) => {
 
 // =========== FIM CRUD READ ========================
 
+// =========== CRUD DELETE ==========================
+
+ipcMain.on('delete-client', async (event, id) => {
+  console.log(id) // teste do passo 2 (recebimento do id)
+  try {
+    // importante- confirmar a exclusão
+    // client é o nome da variavel que representa a janela
+    const {response} = await dialog.showMessageBox(client, {
+      type: 'warning',
+      title: "Atenção!",
+      message: "Deseja excluir este cliente? \nEsta ação não poderá ser desfeita",
+      buttons: ['Cancelar','Excluir'] //[0,1]
+    })
+    if (response === 1) {
+      
+      // Passo 3 - Excluir o registro do cliente
+      const delClient = await clientModel.findByIdAndDelete(id)
+      event.reply('reset-form')
+    }
+  } catch (error) {
+      console.log(error)
+  }
+})
+
+// =========== FIM DO CRUD DELETE ===================
+
 // =========== CRUD OS ==============================
 
 ipcMain.on('new-os', async (event, os) => {
@@ -470,3 +496,4 @@ ipcMain.on('new-os', async (event, os) => {
     console.error('Erro ao salvar OS:', error);
   }
 })
+
