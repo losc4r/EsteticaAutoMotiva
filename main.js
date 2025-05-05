@@ -106,7 +106,7 @@ function osWindow() {
   if (main) {
     os = new BrowserWindow({
       width: 1020,
-      heigth: 720,
+      heigth: 1920,
       //autoHideMenuBar: true,
       resizable: false,
       parent: main,

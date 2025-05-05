@@ -11,6 +11,50 @@ document.addEventListener('DOMContentLoaded', () => {
     foco.focus();
 });
 
+// capturar marcas de veiculos no campo modelo
+
+const selectMarca = document.getElementById("inputMarcaVeiculoOS");
+const selectModelo = document.getElementById("inputModeloVeiculoOS");
+
+// Carregar marcas ao abrir a página
+fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas")
+    .then(response => response.json())
+    .then(marcas => {
+        selectMarca.innerHTML = '<option selected disabled>Selecione uma marca</option>';
+        marcas.forEach(marca => {
+            const option = document.createElement("option");
+            option.value = marca.codigo; // precisa do código para buscar modelos
+            option.textContent = marca.nome;
+            selectMarca.appendChild(option);
+        });
+    });
+
+// Quando uma marca for selecionada
+selectMarca.addEventListener("change", () => {
+    const marcaSelecionada = selectMarca.value;
+
+    // Desativa e limpa o select de modelos
+    selectModelo.innerHTML = '<option>Carregando modelos...</option>';
+    selectModelo.disabled = true;
+
+    // Buscar modelos da marca
+    fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelecionada}/modelos`)
+        .then(response => response.json())
+        .then(data => {
+            const modelos = data.modelos;
+
+            selectModelo.innerHTML = '<option selected disabled>Selecione um modelo</option>';
+            modelos.forEach(modelo => {
+                const option = document.createElement("option");
+                option.value = modelo.nome;
+                option.textContent = modelo.nome;
+                selectModelo.appendChild(option);
+            });
+
+            selectModelo.disabled = false;
+        });
+});
+
 //captura dos dados dos inputs do formulário (Passo 1: fluxo)
 let frmOS = document.getElementById("frmOS");
 let srvOS = document.getElementById("inputDadosOS");
@@ -55,3 +99,29 @@ function resetForm() {
 api.resetForm((args) => {
     resetForm()
 }) 
+
+// ===============================
+// = CRUD Create/Update ===============
+
+// =======================
+// Manipulação da tecla Enter
+
+// função para manipular o evento da tecla ENTER
+function teclaEnter(event) {
+    // se a tecla Enter for pressionada
+    if (event.key === "Enter") {
+      event.preventDefault() // ignorar o comportamento padrão e associar o Enter a busca pelo cliente
+      searchOS()
+    }
+  }
+  
+  // Função para restaurar o padrão da tecla Enter (submit)
+  function restaurarEnter() {
+    frmOS.removeEventListener('keydown', teclaEnter)
+  }
+  
+  // "escuta do evento Tecla Enter"
+  frmOS.addEventListener('keydown', teclaEnter)
+  
+  // Fim manipulação Tecla Enter
+  // =========================
