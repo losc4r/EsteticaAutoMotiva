@@ -22,28 +22,36 @@
         <h1 class="d-flex justify-content-center mb-1"></h1>
         <form id="frmOS" class="mt-2 row g-2">
 
+
+
             <!-- Número da OS -->
             <div class="col-md-2">
                 <label for="inputNumeroOS" class="form-label">Número OS</label>
                 <input type="number" class="form-control" id="inputNumeroOS" spellcheck="false" disabled maxlength="30">
             </div>
 
-            <!-- Data da abertura  -->
-            <div class="col-md-2">
-                <label for="inputDateOS" class="form-label">Data da Abertura</label>
-                <input type="date" class="form-control" id="inputDateOS" spellcheck="false" disabled maxlength="8">
+            <!-- Data -->
+            <div class="col-md-3">
+                <label class="form-label">Data de entrada</label>
+                <input type="text" class="form-control" id="inputData" disabled>
             </div>
 
             <!-- Buscar cliente -->
             <div class="col-md-5" id="buscarclientes">
-                <label for="inputNumeroOS" class="form-label">
-                    Buscar Clientes
-                </label>
+                <label for="inputSearchClient" class="form-label"> Buscar Clientes</label>
                 <div class="d-flex">
-                    <input type="text" class="form-control" id="searchOS" maxlength="30" spellcheck="false">
-                    <button type="button" class="btn btn-dark ml-2" id="btnRead" onclick="searchOS()"> Buscar</button>
+                    <input type="text" class="form-control" id="inputSearchClient" maxlength="30" spellcheck="false">
+                    <span class="input-group-text">
+                        <img src="../public/img/search.png" alt="lupa" width="20">
+                    </span>     
                 </div>
+                <ul id="viewListSuggestion" class="list-group position-absolute w-100"></ul>
+            </div>
 
+            <!-- Id -->
+            <div class="col-md-3">
+                <label for="inputIdClient" class="form-label">Id do cliente</label>
+                <input type="text" class="form-control" id="inputIdClient" spellcheck="false" maxlength="15" disabled>
             </div>
 
             <!-- Nome cliente -->
@@ -55,7 +63,6 @@
             <!--CPF do cliente-->
             <div class="col-md-2">
                 <label for="inputCPFClient" class="form-label">CPF</label>
-
                 <input type="text" class="form-control" id="inputCPFClient" disabled spellcheck="false" maxlength="30">
             </div>
 
@@ -65,6 +72,8 @@
                 <input type="text" class="form-control" id="inputIPhoneClient" disabled spellcheck="false"
                     maxlength="30">
             </div>
+
+            <input type="text" id="idClient"> <!-- oculto -->
 
             <!-- Linha -->
             <hr class="mt-4 border border-dark border -1">
@@ -102,14 +111,14 @@
             <!-- Funcionario Responsavel  -->
             <div class="col-md-2">
                 <label for="inputFuncionarioOS" class="form-label">Funcionário </label>
-                <input type="text" class="form-control" id="inputPlacaVeiculoOS" spellcheck="false" maxlength="20">
+                <input type="text" class="form-control" id="inputFuncionarioOS" spellcheck="false" maxlength="20">
             </div>
 
 
             <!-- Status -->
             <div class="col-md-2">
                 <label class="form-label">Status da OS</label>
-                <select class="form-select" id="osStatus">
+                <select class="form-select" id="inputosStatus">
                     <option value="">Selecione</option>
                     <option>Aberta</option>
                     <option>Em andamento</option>
@@ -118,37 +127,44 @@
                 </select>
             </div>
 
-
-
             <!-- Serviço -->
-            <div class="col-md-4">
-                <label for="inputDadosOS" class="form-label">Serviço Solicitado</label>
-                <textarea class="form-control" id="inputDadosOS" rows="2" maxlength="500" spellcheck="false"
+            <div class="col-md-6">
+                <label for="inputServicoOS" class="form-label">Serviço Solicitado</label>
+                <textarea class="form-control" id="inputServicoOS" rows="2" maxlength="500" spellcheck="false"
                     placeholder="Descreva o serviço solicitado..."></textarea>
             </div>
 
-            <!-- Obs -->
-            <div class="col-md-4">
+            <!-- Observações -->
+            <div class="col-md-6">
                 <label for="inputObsOS" class="form-label">Observações</label>
                 <textarea class="form-control" id="inputObsOS" rows="2" maxlength="500" spellcheck="false"
                     placeholder="Descreva o serviço solicitado..."></textarea>
+            </div>
 
-                <!-- Valor -->
-                <div class="col-md-5">
-                    <label for="inputValorOS" class="form-label">Valor Total</label>
-                    <input type="text" class="form-control" id="inputValorOS" spellcheck="false" maxlength="30"
-                        onkeyup="formatarMoeda(this)">
+            <!-- Linha com botões à esquerda e valor total à direita -->
+            <div class="row mt-4 align-items-end">
+                <!-- Botões alinhados à esquerda -->
+
+                <div class="mt-4 d-flex justify-content-center gap-1">
+                    <button type="submit" class="btn btn-success">Gerar OS</button>
+                    <button type="button" class="btn btn-primary" onclick="findOS()">Buscar OS</button>
+                    <button type="submit" class="btn btn-warning">Editar OS</button>
+                    <button type="button" class="btn btn-danger">Excluir OS</button>
+                    <button type="button" class="btn btn-secondary">Imprimir OS</button>
+                    <button type="reset" class="btn" id="btnReset" onclick="resetForm()"></button>
+
+                    <!-- Ícone separado com margem à direita -->
+                    <!--<button type="reset" class="btn btn-light" id="btnReset" onclick="resetForm()">🧹</button>
+
+                    <!-- Campo Valor Total com margem à esquerda -->
+                    <div class="col-md-4 ms-4">
+                        <label for="inputValorOS" class="form-label">Valor Total</label>
+                        <input type="text" class="form-control d-inline-block w-auto" id="inputValorOS" maxlength="30"
+                            onkeyup="formatarMoeda(this)">
+                    </div>
                 </div>
 
 
-                <!--Botões-->
-                <div class="mt-1">
-                    <button type="submit" class="btn btn-success" id="btnCreate">Adicionar</button>
-                    <button type="submit" class="btn btn-warning" id="btnUpdate">Editar</button>
-                    <button type="button" class="btn btn-danger" id="btnDelete">Delete</button>
-
-                    <button type="reset" class="btn mt-3" id="btnReset" onclick="resetForm()"></button>
-                </div>
 
         </form>
     </div>

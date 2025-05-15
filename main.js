@@ -18,8 +18,15 @@ const osModel = require("./src/models/os.js")
 // importação do pacote jspdf (npm i jspdf)
 const { jspdf, default: jsPDF } = require('jspdf')
 
+// importação do mongoose
+const mongoose = require('mongoose')
+
 // importação da biblioteca fs (nativa do javascript) para manipulação de arquivos
 const fs = require('fs')
+
+// Importação do recurso 'electron-prompt' (dialog de input)
+// 1º instalar o recurso: npm i electron-prompt
+const prompt = require('electron-prompt')
 
 // Janela principal
 let win
@@ -376,6 +383,7 @@ async function relatorioClientes() {
   }
 }
 
+
 // =========== FIM Relatório de Cliente =============
 
 // =========== CRUD READ ============================
@@ -515,35 +523,167 @@ ipcMain.on('update-client', async (event, client) => {
 // =========== FIM DO CRUD UPDATE ===================
 
 
-// =========== CRUD OS ==============================
+//************************************************************/
+//*******************  Ordem de Serviço  *********************/
+//************************************************************/
 
-ipcMain.on('new-os', async (event, os) => {
-  console.log(os)
+
+// ============================================================
+// == Buscar OS ===============================================
+
+ipcMain.on('search-os', (event) => {
+  //console.log("teste: busca OS")
+  prompt({
+    title: 'Buscar OS',
+    label: 'Digite o número da OS:',
+    inputAttrs: {
+      type: 'text'
+    },
+    type: 'input',
+    width: 400,
+    height: 200
+  }).then((result) => {
+    if (result !== null) {
+      console.log(result)
+      //buscar a os no banco pesquisando pelo valor do result (número da OS)
+
+    }
+  })
+})
+
+// == Fim - Buscar OS =========================================
+// ============================================================
+
+// ================ Buscar Cliente para vincular na OS estilo GOOGLE =================
+
+ipcMain.on('search-clients', async (event) => {
   try {
-    const newOs = new osModel({
+    // Buscar clientes no banco em ordem alfabética pelo nome
+    const clientes = await clientModel.find().sort({ nomeCliente: 1 })
+    //console.log(clientes) // teste do passo 2
 
-      servicooS: os.servicoOS,
-      modelooS: os.modeloOS,
-      placaoS: os.placaOS,
-      prazooS: os.prazoOS,
-      statusoS: os.statusOS,
-      valoroS: os.valorOS
+    // passo 3: Envio dos clientes para o renderizador
+    // obs: não esquecer de converter para String
+    event.reply('list-clients', JSON.stringify(clientes))
 
-    })
-    await newOs.save()
-
-    dialog.showMessageBox({
-      type: 'info',
-      title: "Aviso",
-      message: "Ordem de Serviço Adicionada!!!",
-      buttons: ['OK']
-    }).then((result) => {
-      if (result.response === 0) {
-        event.reply('reset-form')
-      }
-    })
   } catch (error) {
-    console.error('Erro ao salvar OS:', error);
+    console.log(error)
   }
 })
 
+
+// ================ FIM BUSCAR CLIENTE PELA OS =======================
+
+// ============================================================
+// == CRUD Create - Gerar OS ==================================
+
+// Validação de busca (preenchimento obrigatório Id Cliente-OS)
+ipcMain.on('validate-client', (event) => {
+  dialog.showMessageBox({
+      type: 'warning',
+      title: "Aviso!",
+      message: "É obrigatório vincular o cliente na Ordem de Serviço",
+      buttons: ['OK']
+  }).then((result) => {
+      //ação ao pressionar o botão (result = 0)
+      if (result.response === 0) {
+          event.reply('set-search')
+      }
+  })
+})
+
+ipcMain.on('new-os', async (event, os) => {
+  //importante! teste de recebimento dos dados da os (passo 2)
+  console.log(os)
+  // Cadastrar a estrutura de dados no banco de dados MongoDB
+  try {
+      // criar uma nova de estrutura de dados usando a classe modelo. Atenção! Os atributos precisam ser idênticos ao modelo de dados OS.js e os valores são definidos pelo conteúdo do objeto os
+      const newOS = new osModel({
+          idCliente: os.idClientOS,
+          marca: os.marca_OS,
+          modelo: os.modelo_OS,
+          placa: os.placa_OS,
+          prazo: os.prazo_OS,
+          funcionario: os.funcionario_OS,
+          stats: os.stats_OS,
+          servico: os.servico_OS,
+          observacoes: os.observacoes_OS,
+          valor: os.valor_OS
+      })
+      // salvar os dados da OS no banco de dados
+      await newOS.save()
+      // Mensagem de confirmação
+      dialog.showMessageBox({
+          //customização
+          type: 'info',
+          title: "Aviso",
+          message: "OS gerada com sucesso",
+          buttons: ['OK']
+      }).then((result) => {
+          //ação ao pressionar o botão (result = 0)
+          if (result.response === 0) {
+              //enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo 'reset-form' do preload.js
+              event.reply('reset-form')
+          }
+      })
+  } catch (error) {
+      console.log(error)
+  }
+})
+
+// == Fim - CRUD Create - Gerar OS ===========================
+// ============================================================
+
+
+// ============================================================
+// == Buscar OS ===============================================
+
+ipcMain.on('search-os', (event) =>{
+  //console.log("teste: busca OS")
+  prompt({
+    title: 'Buscar OS',
+    label: 'Digite o número da OS:',
+    inputAttrs: {
+        type: 'text'
+    },
+    type: 'input',        
+    width: 400,
+    height: 200
+}).then(async(result) => {
+    if (result !== null) {
+        
+        //buscar a os no banco pesquisando pelo valor do result (número da OS)
+        if (mongoose.Types.ObjectId.isValid(result)) {
+          try {
+              const dataOS = await osModel.findById(result)
+              if (dataOS) {
+                  console.log(dataOS) // teste importante
+                  // enviando os dados da OS ao rendererOS
+                  // OBS: IPC só trabalha com string, então é necessário converter o JSON para string JSON.stringify(dataOS)
+                  event.reply('render-os', JSON.stringify(dataOS))
+              } else {
+                  dialog.showMessageBox({
+                      type: 'warning',
+                      title: "Aviso!",
+                      message: "OS não encontrada",
+                      buttons: ['OK']
+                  })
+              }
+          } catch (error) {
+              console.log(error)
+          }
+      } else {
+          dialog.showMessageBox({
+              type: 'error',
+              title: "Atenção!",
+              message: "Formato do número da OS inválido.\nVerifique e tente novamente.",
+              buttons: ['OK']
+          })
+      }
+    } 
+})
+})
+
+
+// == Fim - Buscar OS =========================================
+// ============================================================

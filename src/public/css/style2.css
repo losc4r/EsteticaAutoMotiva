@@ -16,3 +16,9 @@ body {
 #idClient {
     display: none;
 }
+
+/* lista de clientes vinculados a OS */
+#viewListSuggestion {
+    z-index: 2;
+    max-width: 382px;
+}

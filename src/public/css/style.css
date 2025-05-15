@@ -19,7 +19,7 @@
     width: 180px;
     height: 180px;
     top: 50%;
-    left: 50%;
+    left: 49%;
     transform: translate(-50%, -50%);
 }
 
@@ -74,3 +74,10 @@ body {
     justify-content: center;
     align-items: center;
 }
+
+/* lista de clientes vinculados a OS */
+#viewListSuggestion {
+    z-index: 0;
+    max-width: 382px;
+}
+    

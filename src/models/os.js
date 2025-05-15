@@ -8,23 +8,40 @@ const { model, Schema } = require('mongoose')
 
 //Criação da estrutura da coleção Clientes
 const osSchema = new Schema({
+    
+    dataEntrada: {
+        type: Date,
+        default: Date.now
+    },
 
-    servicooS: {
+    idCliente: {
         type: String
     },
-    modelooS: {
+    marca: {
         type: String
     },
-    placaoS: {
+    modelo: {
         type: String
     },
-    prazooS: {
+    placa: {
         type: String
     },
-    statusoS: {
+    prazo: {
         type: String
     },
-    valoroS: {
+    funcionario: {
+        type: String
+    },
+    stats: {
+        type: String
+    },
+    servico: {
+        type: String
+    },
+    observacoes: {
+        type: String
+    },
+    valor: {
         type: String
     }
 
