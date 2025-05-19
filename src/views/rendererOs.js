@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // capturar marcas de veiculos no campo modelo
 
 const selectMarca = document.getElementById("inputMarcaVeiculoOS");
-const selectModelo = document.getElementById("inputModeloVeiculoOS");
 
 // Carregar marcas ao abrir a página
 fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas")
@@ -105,39 +104,15 @@ fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas")
         });
     });
 
-// Quando uma marca for selecionada
-selectMarca.addEventListener("change", () => {
-    const marcaSelecionada = selectMarca.value;
-
-    // Desativa e limpa o select de modelos
-    selectModelo.innerHTML = '<option>Carregando modelos...</option>';
-    selectModelo.disabled = true;
-
-    // Buscar modelos da marca
-    fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelecionada}/modelos`)
-        .then(response => response.json())
-        .then(data => {
-            const modelos = data.modelos;
-
-            selectModelo.innerHTML = '<option selected disabled>Selecione um modelo</option>';
-            modelos.forEach(modelo => {
-                const option = document.createElement("option");
-                option.value = modelo.nome;
-                option.textContent = modelo.nome;
-                selectModelo.appendChild(option);
-            });
-
-            selectModelo.disabled = false;
-        });
-});
-
-
 // criar um vetor para manipulação dos dados da OS
 let arrayOS = []
 
 //captura dos dados dos inputs do formulário (Passo 1: fluxo)
 let frmOS = document.getElementById("frmOS");
 let idos = document.getElementById("inputNumeroOS")
+let nome = document.getElementById("inputNameClient")
+let cpf = document.getElementById("inputCPFClient")
+let telefone = document.getElementById("inputIPhoneClient")
 let marca = document.getElementById("inputMarcaVeiculoOS");
 let modelo = document.getElementById("inputModeloVeiculoOS");
 let placa = document.getElementById("inputPlacaVeiculoOS");
@@ -168,12 +143,15 @@ frmOS.addEventListener('submit', async (event) => {
         api.validateClient()
     } else {
         // Teste importante (recebimento dos dados do formuláro - passo 1 do fluxo)
-        console.log(os.value, idClient.value, marca.value, modelo.value, placa.value, prazo.value, funcionario.value, stats.value, servico.value, observacoes.value, valor.value)
+        console.log(os.value, idClient.value, nome.value, cpf.value, telefone.value, marca.value, modelo.value, placa.value, prazo.value, funcionario.value, stats.value, servico.value, observacoes.value, valor.value)
         if (os.value === "") {
             //Gerar OS
             //Criar um objeto para armazenar os dados da OS antes de enviar ao main
             const os = {
                 idClientOS: idClient.value,
+                nome_OS: nome.value,
+                cpf_OS: cpf.value,
+                telefone_OS: telefone.value,
                 marca_OS: marca.value,
                 modelo_OS: modelo.value,
                 placa_OS: placa.value,
@@ -223,6 +201,9 @@ api.renderOS((event, dataOS) => {
     idos.value = os._id
     dateOS.value = formatada    
     idClient.value = os.idCliente
+    nome.value = os.nome
+    cpf.value = os.cpf
+    telefone.value = os.telefone
     marca.value = os.marca
     modelo.value = os.modelo
     placa.value = os.placa

@@ -17,6 +17,19 @@ const osSchema = new Schema({
     idCliente: {
         type: String
     },
+
+    nome: {
+        type: String
+    },
+
+    cpf: {
+        type: String
+    },
+
+    telefone: {
+        type: String
+    },
+    
     marca: {
         type: String
     },

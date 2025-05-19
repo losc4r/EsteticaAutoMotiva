@@ -27,7 +27,7 @@
             <!-- Número da OS -->
             <div class="col-md-2">
                 <label for="inputNumeroOS" class="form-label">Número OS</label>
-                <input type="number" class="form-control" id="inputNumeroOS" spellcheck="false" disabled maxlength="30">
+                <input type="text" class="form-control" id="inputNumeroOS" spellcheck="false" disabled maxlength="30">
             </div>
 
             <!-- Data -->
@@ -89,9 +89,7 @@
             <!-- Modelo do Veículo -->
             <div class="col-md-2">
                 <label for="inputModeloVeiculoOS" class="form-label">Modelo Veículo</label>
-                <select id="inputModeloVeiculoOS" class="form-select" disabled>
-                    <option selected>Selecione uma marca </option>
-                </select>
+                <input type="text" class="form-control" id="inputModeloVeiculoOS" spellcheck="false" maxlength="20">
             </div>
 
 
@@ -120,10 +118,10 @@
                 <label class="form-label">Status da OS</label>
                 <select class="form-select" id="inputosStatus">
                     <option value="">Selecione</option>
-                    <option>Aberta</option>
-                    <option>Em andamento</option>
-                    <option>Finalizada</option>
-                    <option>Cancelada</option>
+                    <option value="Aberta">Aberta</option>
+                    <option value="Em andamento">Em andamento</option>
+                    <option value="Finalizada">Finalizada</option>
+                    <option value="Cancelada">Cancelada</option>
                 </select>
             </div>
 

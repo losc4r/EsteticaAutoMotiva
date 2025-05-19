@@ -194,11 +194,26 @@ const template = [
         click: () => relatorioClientes()
       },
       {
-        label: 'Serviços Realizados'
-      },
-      {
-        label: 'Faturamento'
-      },
+        label: 'Ordem de Serviços',
+        submenu: [
+          {
+            label: 'Abertas',
+            click: () => relatorioOSAbertas()
+          },
+          {
+            label: 'Andamento',
+            click: () => relatorioOSAndamento()
+          },
+          {
+            label: 'Finalizadas',
+            click: () => relatorioOSFinalizadas()
+          },
+          {
+            label: 'Canceladas',
+            click: () => relatorioOSCanceladas()
+          }
+        ]
+      }
     ]
   },
   {
@@ -528,31 +543,297 @@ ipcMain.on('update-client', async (event, client) => {
 //************************************************************/
 
 
-// ============================================================
-// == Buscar OS ===============================================
+//==================== RELATORIO OS ==============================/
 
-ipcMain.on('search-os', (event) => {
-  //console.log("teste: busca OS")
-  prompt({
-    title: 'Buscar OS',
-    label: 'Digite o número da OS:',
-    inputAttrs: {
-      type: 'text'
-    },
-    type: 'input',
-    width: 400,
-    height: 200
-  }).then((result) => {
-    if (result !== null) {
-      console.log(result)
-      //buscar a os no banco pesquisando pelo valor do result (número da OS)
 
+async function relatorioOSAbertas() {
+  try {
+    
+    const clientes = await osModel.find({ stats: 'Aberta' }).sort({ prazo: 1 })
+
+    const doc = new jsPDF('p', 'mm', 'a4')
+
+    const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
+    const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
+    doc.addImage(imageBase64, 'PNG', 20, 8) //(5mm, 8mm x,y)
+
+    doc.setFontSize(18)
+
+    doc.text("Relatório de Ordem de Serviços", 14, 45)//x,y (mm) 
+
+    const dataAtual = new Date().toLocaleDateString('pt-BR')
+    doc.setFontSize(12)
+    doc.text(`Data: ${dataAtual}`, 160, 10)
+
+    let y = 60
+    doc.text("Modelo Veiculo", 14, y)
+    doc.text("Funcionario", 70, y)
+    doc.text("Serviço", 120, y)
+    doc.text("Prazo de Entrega", 165, y)
+    y += 5
+
+    doc.setLineWidth(0.5) // expessura da linha
+    doc.line(10, y, 200, y) // inicio e fim
+
+    y += 10 // espaçãmento da linha
+
+    clientes.forEach((c) => {
+      
+      if (y > 280) {
+        doc.addPage()
+        y = 20
+        doc.text("Modelo Veículo", 14, y)
+        doc.text("Funcionário", 70, y)
+        doc.text("Serviço", 120, y)
+        doc.text("Prazo de Entrega", 165, y)
+        y += 5
+        doc.setLineWidth(0.5)
+        doc.line(10, y, 200, y)
+        y += 10
+      }
+    
+      doc.text(c.modelo || "N/A", 14, y)
+      doc.text(c.funcionario || "N/A", 70, y)
+      doc.text(c.servico || "N/A", 120, y)
+      doc.text(c.prazo || "N/A", 165, y)
+      y += 10
+    })
+
+    const paginas = doc.internal.getNumberOfPages()
+    for (let i = 1; i <= paginas; i++) {
+      doc.setPage(i)
+      doc.setFontSize(10)
+      doc.text(`Página ${i} de ${paginas}`, 105, 290, { align: 'center' })
     }
-  })
-})
 
-// == Fim - Buscar OS =========================================
-// ============================================================
+    const tempDir = app.getPath('temp')
+    const filePath = path.join(tempDir, 'ordemservico.pdf')
+
+    doc.save(filePath)
+
+    shell.openPath(filePath)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+async function relatorioOSAndamento() {
+  try {
+    
+    const clientes = await osModel.find({ stats: 'Em andamento' }).sort({ prazo: 1 })
+
+    const doc = new jsPDF('p', 'mm', 'a4')
+
+    const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
+    const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
+    doc.addImage(imageBase64, 'PNG', 20, 8) //(5mm, 8mm x,y)
+
+    doc.setFontSize(18)
+
+    doc.text("Relatório de Ordem de Serviços", 14, 45)//x,y (mm) 
+
+    const dataAtual = new Date().toLocaleDateString('pt-BR')
+    doc.setFontSize(12)
+    doc.text(`Data: ${dataAtual}`, 160, 10)
+
+    let y = 60
+    doc.text("Modelo Veiculo", 14, y)
+    doc.text("Funcionario", 70, y)
+    doc.text("Serviço", 120, y)
+    doc.text("Prazo de Entrega", 165, y)
+    y += 5
+
+    doc.setLineWidth(0.5) // expessura da linha
+    doc.line(10, y, 200, y) // inicio e fim
+
+    y += 10 // espaçãmento da linha
+
+    clientes.forEach((c) => {
+      
+      if (y > 280) {
+        doc.addPage()
+        y = 20
+        doc.text("Modelo Veículo", 14, y)
+        doc.text("Funcionário", 70, y)
+        doc.text("Serviço", 120, y)
+        doc.text("Prazo de Entrega", 165, y)
+        y += 5
+        doc.setLineWidth(0.5)
+        doc.line(10, y, 200, y)
+        y += 10
+      }
+    
+      doc.text(c.modelo || "N/A", 14, y)
+      doc.text(c.funcionario || "N/A", 70, y)
+      doc.text(c.servico || "N/A", 120, y)
+      doc.text(c.prazo || "N/A", 165, y)
+      y += 10
+    })
+
+    const paginas = doc.internal.getNumberOfPages()
+    for (let i = 1; i <= paginas; i++) {
+      doc.setPage(i)
+      doc.setFontSize(10)
+      doc.text(`Página ${i} de ${paginas}`, 105, 290, { align: 'center' })
+    }
+
+    const tempDir = app.getPath('temp')
+    const filePath = path.join(tempDir, 'ordemservico.pdf')
+
+    doc.save(filePath)
+
+    shell.openPath(filePath)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+async function relatorioOSFinalizadas() {
+  try {
+    
+    const clientes = await osModel.find({ stats: 'Finalizada' }).sort({ prazo: 1 })
+
+    const doc = new jsPDF('p', 'mm', 'a4')
+
+    const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
+    const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
+    doc.addImage(imageBase64, 'PNG', 20, 8) //(5mm, 8mm x,y)
+
+    doc.setFontSize(18)
+
+    doc.text("Relatório de Ordem de Serviços", 14, 45)//x,y (mm) 
+
+    const dataAtual = new Date().toLocaleDateString('pt-BR')
+    doc.setFontSize(12)
+    doc.text(`Data: ${dataAtual}`, 160, 10)
+
+    let y = 60
+    doc.text("Modelo Veiculo", 14, y)
+    doc.text("Funcionario", 70, y)
+    doc.text("Serviço", 120, y)
+    doc.text("Prazo de Entrega", 165, y)
+    y += 5
+
+    doc.setLineWidth(0.5) // expessura da linha
+    doc.line(10, y, 200, y) // inicio e fim
+
+    y += 10 // espaçãmento da linha
+
+    clientes.forEach((c) => {
+      
+      if (y > 280) {
+        doc.addPage()
+        y = 20
+        doc.text("Modelo Veículo", 14, y)
+        doc.text("Funcionário", 70, y)
+        doc.text("Serviço", 120, y)
+        doc.text("Prazo de Entrega", 165, y)
+        y += 5
+        doc.setLineWidth(0.5)
+        doc.line(10, y, 200, y)
+        y += 10
+      }
+    
+      doc.text(c.modelo || "N/A", 14, y)
+      doc.text(c.funcionario || "N/A", 70, y)
+      doc.text(c.servico || "N/A", 120, y)
+      doc.text(c.prazo || "N/A", 165, y)
+      y += 10
+    })
+
+    const paginas = doc.internal.getNumberOfPages()
+    for (let i = 1; i <= paginas; i++) {
+      doc.setPage(i)
+      doc.setFontSize(10)
+      doc.text(`Página ${i} de ${paginas}`, 105, 290, { align: 'center' })
+    }
+
+    const tempDir = app.getPath('temp')
+    const filePath = path.join(tempDir, 'ordemservico.pdf')
+
+    doc.save(filePath)
+
+    shell.openPath(filePath)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+async function relatorioOSCanceladas() {
+  try {
+    
+    const clientes = await osModel.find({ stats: 'Cancelada' }).sort({ prazo: 1 })
+
+    const doc = new jsPDF('p', 'mm', 'a4')
+
+    const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
+    const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
+    doc.addImage(imageBase64, 'PNG', 20, 8) //(5mm, 8mm x,y)
+
+    doc.setFontSize(18)
+
+    doc.text("Relatório de Ordem de Serviços", 14, 45)//x,y (mm) 
+
+    const dataAtual = new Date().toLocaleDateString('pt-BR')
+    doc.setFontSize(12)
+    doc.text(`Data: ${dataAtual}`, 160, 10)
+
+    let y = 60
+    doc.text("Modelo Veiculo", 14, y)
+    doc.text("Funcionario", 70, y)
+    doc.text("Serviço", 120, y)
+    doc.text("Prazo de Entrega", 165, y)
+    y += 5
+
+    doc.setLineWidth(0.5) // expessura da linha
+    doc.line(10, y, 200, y) // inicio e fim
+
+    y += 10 // espaçãmento da linha
+
+    clientes.forEach((c) => {
+      
+      if (y > 280) {
+        doc.addPage()
+        y = 20
+        doc.text("Modelo Veículo", 14, y)
+        doc.text("Funcionário", 70, y)
+        doc.text("Serviço", 120, y)
+        doc.text("Prazo de Entrega", 165, y)
+        y += 5
+        doc.setLineWidth(0.5)
+        doc.line(10, y, 200, y)
+        y += 10
+      }
+    
+      doc.text(c.modelo || "N/A", 14, y)
+      doc.text(c.funcionario || "N/A", 70, y)
+      doc.text(c.servico || "N/A", 120, y)
+      doc.text(c.prazo || "N/A", 165, y)
+      y += 10
+    })
+
+    const paginas = doc.internal.getNumberOfPages()
+    for (let i = 1; i <= paginas; i++) {
+      doc.setPage(i)
+      doc.setFontSize(10)
+      doc.text(`Página ${i} de ${paginas}`, 105, 290, { align: 'center' })
+    }
+
+    const tempDir = app.getPath('temp')
+    const filePath = path.join(tempDir, 'ordemservico.pdf')
+
+    doc.save(filePath)
+
+    shell.openPath(filePath)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+// =============================== FIM RELATORIO OS =======================================
+
+
 
 // ================ Buscar Cliente para vincular na OS estilo GOOGLE =================
 
@@ -580,15 +861,15 @@ ipcMain.on('search-clients', async (event) => {
 // Validação de busca (preenchimento obrigatório Id Cliente-OS)
 ipcMain.on('validate-client', (event) => {
   dialog.showMessageBox({
-      type: 'warning',
-      title: "Aviso!",
-      message: "É obrigatório vincular o cliente na Ordem de Serviço",
-      buttons: ['OK']
+    type: 'warning',
+    title: "Aviso!",
+    message: "É obrigatório vincular o cliente na Ordem de Serviço",
+    buttons: ['OK']
   }).then((result) => {
-      //ação ao pressionar o botão (result = 0)
-      if (result.response === 0) {
-          event.reply('set-search')
-      }
+    //ação ao pressionar o botão (result = 0)
+    if (result.response === 0) {
+      event.reply('set-search')
+    }
   })
 })
 
@@ -597,37 +878,40 @@ ipcMain.on('new-os', async (event, os) => {
   console.log(os)
   // Cadastrar a estrutura de dados no banco de dados MongoDB
   try {
-      // criar uma nova de estrutura de dados usando a classe modelo. Atenção! Os atributos precisam ser idênticos ao modelo de dados OS.js e os valores são definidos pelo conteúdo do objeto os
-      const newOS = new osModel({
-          idCliente: os.idClientOS,
-          marca: os.marca_OS,
-          modelo: os.modelo_OS,
-          placa: os.placa_OS,
-          prazo: os.prazo_OS,
-          funcionario: os.funcionario_OS,
-          stats: os.stats_OS,
-          servico: os.servico_OS,
-          observacoes: os.observacoes_OS,
-          valor: os.valor_OS
-      })
-      // salvar os dados da OS no banco de dados
-      await newOS.save()
-      // Mensagem de confirmação
-      dialog.showMessageBox({
-          //customização
-          type: 'info',
-          title: "Aviso",
-          message: "OS gerada com sucesso",
-          buttons: ['OK']
-      }).then((result) => {
-          //ação ao pressionar o botão (result = 0)
-          if (result.response === 0) {
-              //enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo 'reset-form' do preload.js
-              event.reply('reset-form')
-          }
-      })
+    // criar uma nova de estrutura de dados usando a classe modelo. Atenção! Os atributos precisam ser idênticos ao modelo de dados OS.js e os valores são definidos pelo conteúdo do objeto os
+    const newOS = new osModel({
+      idCliente: os.idClientOS,
+      nome: os.nome_OS,
+      cpf: os.cpf_OS,
+      telefone: os.telefone_OS,
+      marca: os.marca_OS,
+      modelo: os.modelo_OS,
+      placa: os.placa_OS,
+      prazo: os.prazo_OS,
+      funcionario: os.funcionario_OS,
+      stats: os.stats_OS,
+      servico: os.servico_OS,
+      observacoes: os.observacoes_OS,
+      valor: os.valor_OS
+    })
+    // salvar os dados da OS no banco de dados
+    await newOS.save()
+    // Mensagem de confirmação
+    dialog.showMessageBox({
+      //customização
+      type: 'info',
+      title: "Aviso",
+      message: "OS gerada com sucesso",
+      buttons: ['OK']
+    }).then((result) => {
+      //ação ao pressionar o botão (result = 0)
+      if (result.response === 0) {
+        //enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo 'reset-form' do preload.js
+        event.reply('reset-form')
+      }
+    })
   } catch (error) {
-      console.log(error)
+    console.log(error)
   }
 })
 
@@ -638,50 +922,50 @@ ipcMain.on('new-os', async (event, os) => {
 // ============================================================
 // == Buscar OS ===============================================
 
-ipcMain.on('search-os', (event) =>{
+ipcMain.on('search-os', (event) => {
   //console.log("teste: busca OS")
   prompt({
     title: 'Buscar OS',
     label: 'Digite o número da OS:',
     inputAttrs: {
-        type: 'text'
+      type: 'text'
     },
-    type: 'input',        
+    type: 'input',
     width: 400,
     height: 200
-}).then(async(result) => {
+  }).then(async (result) => {
     if (result !== null) {
-        
-        //buscar a os no banco pesquisando pelo valor do result (número da OS)
-        if (mongoose.Types.ObjectId.isValid(result)) {
-          try {
-              const dataOS = await osModel.findById(result)
-              if (dataOS) {
-                  console.log(dataOS) // teste importante
-                  // enviando os dados da OS ao rendererOS
-                  // OBS: IPC só trabalha com string, então é necessário converter o JSON para string JSON.stringify(dataOS)
-                  event.reply('render-os', JSON.stringify(dataOS))
-              } else {
-                  dialog.showMessageBox({
-                      type: 'warning',
-                      title: "Aviso!",
-                      message: "OS não encontrada",
-                      buttons: ['OK']
-                  })
-              }
-          } catch (error) {
-              console.log(error)
-          }
-      } else {
-          dialog.showMessageBox({
-              type: 'error',
-              title: "Atenção!",
-              message: "Formato do número da OS inválido.\nVerifique e tente novamente.",
+
+      //buscar a os no banco pesquisando pelo valor do result (número da OS)
+      if (mongoose.Types.ObjectId.isValid(result)) {
+        try {
+          const dataOS = await osModel.findById(result)
+          if (dataOS) {
+            console.log(dataOS) // teste importante
+            // enviando os dados da OS ao rendererOS
+            // OBS: IPC só trabalha com string, então é necessário converter o JSON para string JSON.stringify(dataOS)
+            event.reply('render-os', JSON.stringify(dataOS))
+          } else {
+            dialog.showMessageBox({
+              type: 'warning',
+              title: "Aviso!",
+              message: "OS não encontrada",
               buttons: ['OK']
-          })
+            })
+          }
+        } catch (error) {
+          console.log(error)
+        }
+      } else {
+        dialog.showMessageBox({
+          type: 'error',
+          title: "Atenção!",
+          message: "Formato do número da OS inválido.\nVerifique e tente novamente.",
+          buttons: ['OK']
+        })
       }
-    } 
-})
+    }
+  })
 })
 
 
