@@ -971,3 +971,145 @@ ipcMain.on('search-os', (event) => {
 
 // == Fim - Buscar OS =========================================
 // ============================================================
+
+
+// ============================================================
+// == Excluir OS - CRUD Delete  ===============================
+
+ipcMain.on('delete-os', async (event, idOS) => {
+  console.log(idOS) // teste do passo 2 (recebimento do id)
+  try {
+      //importante - confirmar a exclusão
+      //osScreen é o nome da variável que representa a janela OS
+      const { response } = await dialog.showMessageBox(os, {
+          type: 'warning',
+          title: "Atenção!",
+          message: "Deseja excluir esta ordem de serviço?\nEsta ação não poderá ser desfeita.",
+          buttons: ['Cancelar', 'Excluir'] //[0, 1]
+      })
+      if (response === 1) {
+          //console.log("teste do if de excluir")
+          //Passo 3 - Excluir a OS
+          const delOS = await osModel.findByIdAndDelete(idOS)
+          event.reply('reset-form')
+      }
+  } catch (error) {
+      console.log(error)
+  }
+})
+
+// == Fim Excluir OS - CRUD Delete ============================
+// ============================================================
+
+
+// ============================================================
+// == Editar OS - CRUD Update =================================
+
+ipcMain.on('update-os', async (event, os) => {
+  //importante! teste de recebimento dos dados da os (passo 2)
+  console.log(os)
+  // Alterar os dados da OS no banco de dados MongoDB
+  try {
+      // criar uma nova de estrutura de dados usando a classe modelo. Atenção! Os atributos precisam ser idênticos ao modelo de dados OS.js e os valores são definidos pelo conteúdo do objeto os
+      const updateOS = await osModel.findByIdAndUpdate(
+          os.id_OS,
+          {
+            idClientOS: idClient.value,
+            nome_OS: nome.value,
+            cpf_OS: cpf.value,
+            telefone_OS: telefone.value,
+            marca_OS: marca.value,
+            modelo_OS: modelo.value,
+            placa_OS: placa.value,
+            prazo_OS: prazo.value,
+            funcionario_OS: funcionario.value,
+            stats_OS: stats.value,
+            servico_OS: servico.value,
+            observacoes_OS: observacoes.value,
+            valor_OS: valor.value,
+          },
+          {
+              new: true
+          }
+      )
+      // Mensagem de confirmação
+      dialog.showMessageBox({
+          //customização
+          type: 'info',
+          title: "Aviso",
+          message: "Dados da OS alterados com sucesso",
+          buttons: ['OK']
+      }).then((result) => {
+          //ação ao pressionar o botão (result = 0)
+          if (result.response === 0) {
+              //enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo 'reset-form' do preload.js
+              event.reply('reset-form')
+          }
+      })
+  } catch (error) {
+      console.log(error)
+  }
+})
+
+// == Fim Editar OS - CRUD Update =============================
+// ============================================================
+
+
+// ======================= IMPRIMIR OS ========================
+
+ipcMain.on('print-os', (event) => {
+  //console.log("teste: busca OS")
+  prompt({
+    title: 'Imprimir OS',
+    label: 'Digite o número da OS:',
+    inputAttrs: {
+      type: 'text'
+    },
+    type: 'input',
+    width: 400,
+    height: 200
+  }).then(async (result) => {
+    if (result !== null) {
+
+      //buscar a os no banco pesquisando pelo valor do result (número da OS)
+      if (mongoose.Types.ObjectId.isValid(result)) {
+        try {
+          // teste para ver se está funcionando
+          //console.log ("Lucas Doente")
+          const dataOS = await osModel.findById(result)
+          if (dataOS) {
+            console.log(dataOS) // teste importante
+
+            // extrair os dados do cliente
+            const dataClient = await clientModel.find({
+              _id: dataOS.idCliente                
+            })
+            console.log(dataClient) 
+
+            // impressão (documento PDF) com os dados da Os, do cliente e termos do serviço (uso do jspdf)
+          } else {
+            dialog.showMessageBox({
+              type: 'warning',
+              title: "Aviso!",
+              message: "OS não encontrada",
+              buttons: ['OK']
+            })
+          }
+        } catch (error) {
+          console.log(error)
+        }
+      } else {
+        dialog.showMessageBox({
+          type: 'error',
+          title: "Atenção!",
+          message: "Formato do número da OS inválido.\nVerifique e tente novamente.",
+          buttons: ['OK']
+        })
+      }
+    }
+  })
+})
+
+
+// ======================= Fim - IMPRIMIR OS ====================
+// ==============================================================

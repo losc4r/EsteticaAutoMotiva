@@ -81,8 +81,8 @@ const foco = document.getElementById('inputSearchClient');
 //Iniciar a janela de clientes alterando as propriedades de alguns elementos
 document.addEventListener('DOMContentLoaded', () => {
     //Desativar os botão 
-    //btnUpdate.disabled = true;
-    //btnDelete.disabled = true;
+    btnUpdate.disabled = true;
+    btnDelete.disabled = true;
     //Foco na busca do cliente
     foco.focus();
 });
@@ -167,6 +167,27 @@ frmOS.addEventListener('submit', async (event) => {
             api.newOs(os)
         } else {
             //Editar OS
+            //Gerar OS
+            //Criar um objeto para armazenar os dados da OS antes de enviar ao main
+            const os = {
+                id_OS: idOS.value,
+                idClientOS: idClient.value,
+                nome_OS: nome.value,
+                cpf_OS: cpf.value,
+                telefone_OS: telefone.value,
+                marca_OS: marca.value,
+                modelo_OS: modelo.value,
+                placa_OS: placa.value,
+                prazo_OS: prazo.value,
+                funcionario_OS: funcionario.value,
+                stats_OS: stats.value,
+                servico_OS: servico.value,
+                observacoes_OS: observacoes.value,
+                valor_OS: valor.value,
+            }
+            // Enviar ao main o objeto os - (Passo 2: fluxo)
+            // uso do preload.js
+            api.updateOS(os)
 
         }
     }
@@ -199,7 +220,7 @@ api.renderOS((event, dataOS) => {
         second: "2-digit"
     })
     idos.value = os._id
-    dateOS.value = formatada    
+    dateOS.value = formatada
     idClient.value = os.idCliente
     nome.value = os.nome
     cpf.value = os.cpf
@@ -213,6 +234,11 @@ api.renderOS((event, dataOS) => {
     servico.value = os.servico
     observacoes.value = os.observacoes
     valor.value = os.valor
+    // desativar o botão adicionar
+    btnCreate.disabled = true
+    // ativar os botões editar e excluir
+    btnUpdate.disabled = false
+    btnDelete.disabled = false
 
 })
 
@@ -235,6 +261,24 @@ api.resetForm((args) => {
 
 // == Fim - reset form ========================================
 // ============================================================
+
+// ============================================================
+// == CRUD Delete =============================================
+
+function removeOS() {
+    console.log(idos.value) // Passo 1 (receber do form o id da OS)
+    api.deleteOS(idos.value) // Passo 2 (enviar o id da OS ao main)
+}
+
+// == Fim - CRUD Delete =======================================
+// ============================================================
+
+// ==================== IMPRIMIR OS ===========================
+
+function generateOS() {
+    api.printOS()
+}
+
 
 // =======================
 // Manipulação da tecla Enter
