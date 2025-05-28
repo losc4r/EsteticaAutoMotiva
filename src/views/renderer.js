@@ -2,7 +2,7 @@
  * Processo de renderização
  */
 
-console.log("Processor de renderização")
+//console.log("Processor de renderização")
 
 // envio de uma mensagem para o main abrir a janela cliente
 function client() {

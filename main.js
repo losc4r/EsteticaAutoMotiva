@@ -548,7 +548,7 @@ ipcMain.on('update-client', async (event, client) => {
 
 async function relatorioOSAbertas() {
   try {
-    
+
     const clientes = await osModel.find({ stats: 'Aberta' }).sort({ prazo: 1 })
 
     const doc = new jsPDF('p', 'mm', 'a4')
@@ -578,7 +578,7 @@ async function relatorioOSAbertas() {
     y += 10 // espaçãmento da linha
 
     clientes.forEach((c) => {
-      
+
       if (y > 280) {
         doc.addPage()
         y = 20
@@ -591,7 +591,7 @@ async function relatorioOSAbertas() {
         doc.line(10, y, 200, y)
         y += 10
       }
-    
+
       doc.text(c.modelo || "N/A", 14, y)
       doc.text(c.funcionario || "N/A", 70, y)
       doc.text(c.servico || "N/A", 120, y)
@@ -619,7 +619,7 @@ async function relatorioOSAbertas() {
 
 async function relatorioOSAndamento() {
   try {
-    
+
     const clientes = await osModel.find({ stats: 'Em andamento' }).sort({ prazo: 1 })
 
     const doc = new jsPDF('p', 'mm', 'a4')
@@ -649,7 +649,7 @@ async function relatorioOSAndamento() {
     y += 10 // espaçãmento da linha
 
     clientes.forEach((c) => {
-      
+
       if (y > 280) {
         doc.addPage()
         y = 20
@@ -662,7 +662,7 @@ async function relatorioOSAndamento() {
         doc.line(10, y, 200, y)
         y += 10
       }
-    
+
       doc.text(c.modelo || "N/A", 14, y)
       doc.text(c.funcionario || "N/A", 70, y)
       doc.text(c.servico || "N/A", 120, y)
@@ -690,7 +690,7 @@ async function relatorioOSAndamento() {
 
 async function relatorioOSFinalizadas() {
   try {
-    
+
     const clientes = await osModel.find({ stats: 'Finalizada' }).sort({ prazo: 1 })
 
     const doc = new jsPDF('p', 'mm', 'a4')
@@ -720,7 +720,7 @@ async function relatorioOSFinalizadas() {
     y += 10 // espaçãmento da linha
 
     clientes.forEach((c) => {
-      
+
       if (y > 280) {
         doc.addPage()
         y = 20
@@ -733,7 +733,7 @@ async function relatorioOSFinalizadas() {
         doc.line(10, y, 200, y)
         y += 10
       }
-    
+
       doc.text(c.modelo || "N/A", 14, y)
       doc.text(c.funcionario || "N/A", 70, y)
       doc.text(c.servico || "N/A", 120, y)
@@ -761,7 +761,7 @@ async function relatorioOSFinalizadas() {
 
 async function relatorioOSCanceladas() {
   try {
-    
+
     const clientes = await osModel.find({ stats: 'Cancelada' }).sort({ prazo: 1 })
 
     const doc = new jsPDF('p', 'mm', 'a4')
@@ -791,7 +791,7 @@ async function relatorioOSCanceladas() {
     y += 10 // espaçãmento da linha
 
     clientes.forEach((c) => {
-      
+
       if (y > 280) {
         doc.addPage()
         y = 20
@@ -804,7 +804,7 @@ async function relatorioOSCanceladas() {
         doc.line(10, y, 200, y)
         y += 10
       }
-    
+
       doc.text(c.modelo || "N/A", 14, y)
       doc.text(c.funcionario || "N/A", 70, y)
       doc.text(c.servico || "N/A", 120, y)
@@ -896,16 +896,26 @@ ipcMain.on('new-os', async (event, os) => {
     })
     // salvar os dados da OS no banco de dados
     await newOS.save()
+
+    // Obter o ID gerado automaticamente pelo MongoDB
+    const osId = newOS._id
+    console.log("ID da nova OS:", osId)
+
     // Mensagem de confirmação
     dialog.showMessageBox({
       //customização
       type: 'info',
       title: "Aviso",
-      message: "OS gerada com sucesso",
-      buttons: ['OK']
+      message: "OS gerada com sucesso.\nDeseja imprimir esta OS?",
+      buttons: ['Sim', 'Não'] // [0, 1]
     }).then((result) => {
       //ação ao pressionar o botão (result = 0)
       if (result.response === 0) {
+        // executar a função printOS passando o id da OS como parâmetro
+        printOS(osId)
+        //enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo 'reset-form' do preload.js
+        event.reply('reset-form')
+      } else {
         //enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo 'reset-form' do preload.js
         event.reply('reset-form')
       }
@@ -979,22 +989,22 @@ ipcMain.on('search-os', (event) => {
 ipcMain.on('delete-os', async (event, idOS) => {
   console.log(idOS) // teste do passo 2 (recebimento do id)
   try {
-      //importante - confirmar a exclusão
-      //osScreen é o nome da variável que representa a janela OS
-      const { response } = await dialog.showMessageBox(os, {
-          type: 'warning',
-          title: "Atenção!",
-          message: "Deseja excluir esta ordem de serviço?\nEsta ação não poderá ser desfeita.",
-          buttons: ['Cancelar', 'Excluir'] //[0, 1]
-      })
-      if (response === 1) {
-          //console.log("teste do if de excluir")
-          //Passo 3 - Excluir a OS
-          const delOS = await osModel.findByIdAndDelete(idOS)
-          event.reply('reset-form')
-      }
+    //importante - confirmar a exclusão
+    //osScreen é o nome da variável que representa a janela OS
+    const { response } = await dialog.showMessageBox(os, {
+      type: 'warning',
+      title: "Atenção!",
+      message: "Deseja excluir esta ordem de serviço?\nEsta ação não poderá ser desfeita.",
+      buttons: ['Cancelar', 'Excluir'] //[0, 1]
+    })
+    if (response === 1) {
+      //console.log("teste do if de excluir")
+      //Passo 3 - Excluir a OS
+      const delOS = await osModel.findByIdAndDelete(idOS)
+      event.reply('reset-form')
+    }
   } catch (error) {
-      console.log(error)
+    console.log(error)
   }
 })
 
@@ -1006,59 +1016,54 @@ ipcMain.on('delete-os', async (event, idOS) => {
 // == Editar OS - CRUD Update =================================
 
 ipcMain.on('update-os', async (event, os) => {
-  //importante! teste de recebimento dos dados da os (passo 2)
-  console.log(os)
-  // Alterar os dados da OS no banco de dados MongoDB
+  console.log(os); // Verifique se os dados estão corretos
+
   try {
-      // criar uma nova de estrutura de dados usando a classe modelo. Atenção! Os atributos precisam ser idênticos ao modelo de dados OS.js e os valores são definidos pelo conteúdo do objeto os
-      const updateOS = await osModel.findByIdAndUpdate(
-          os.id_OS,
-          {
-            idClientOS: idClient.value,
-            nome_OS: nome.value,
-            cpf_OS: cpf.value,
-            telefone_OS: telefone.value,
-            marca_OS: marca.value,
-            modelo_OS: modelo.value,
-            placa_OS: placa.value,
-            prazo_OS: prazo.value,
-            funcionario_OS: funcionario.value,
-            stats_OS: stats.value,
-            servico_OS: servico.value,
-            observacoes_OS: observacoes.value,
-            valor_OS: valor.value,
-          },
-          {
-              new: true
-          }
-      )
-      // Mensagem de confirmação
-      dialog.showMessageBox({
-          //customização
-          type: 'info',
-          title: "Aviso",
-          message: "Dados da OS alterados com sucesso",
-          buttons: ['OK']
-      }).then((result) => {
-          //ação ao pressionar o botão (result = 0)
-          if (result.response === 0) {
-              //enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo 'reset-form' do preload.js
-              event.reply('reset-form')
-          }
-      })
+    const updateOS = await osModel.findByIdAndUpdate(
+      os._id, // ou os.id, dependendo de como você está passando do frontend
+      {
+        idCliente: os.idCliente,
+        nome: os.nome,
+        cpf: os.cpf,
+        telefone: os.telefone,
+        marca: os.marca,
+        modelo: os.modelo,
+        placa: os.placa,
+        prazo: os.prazo,
+        funcionario: os.funcionario,
+        stats: os.stats,
+        servico: os.servico,
+        observacoes: os.observacoes,
+        valor: os.valor
+      },
+      { new: true }
+    );
+
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Aviso',
+      message: 'Dados da OS alterados com sucesso',
+      buttons: ['OK']
+    }).then((result) => {
+      if (result.response === 0) {
+        event.reply('reset-form');
+      }
+    });
+
   } catch (error) {
-      console.log(error)
+    console.error('Erro ao atualizar OS:', error);
   }
-})
+});
 
 // == Fim Editar OS - CRUD Update =============================
 // ============================================================
 
 
-// ======================= IMPRIMIR OS ========================
+// ============================================================
+// Impressão de OS ============================================
 
-ipcMain.on('print-os', (event) => {
-  //console.log("teste: busca OS")
+// impressão via botão imprimir
+ipcMain.on('print-os', async (event) => {
   prompt({
     title: 'Imprimir OS',
     label: 'Digite o número da OS:',
@@ -1069,24 +1074,133 @@ ipcMain.on('print-os', (event) => {
     width: 400,
     height: 200
   }).then(async (result) => {
+    // buscar OS pelo id (verificar formato usando o mongoose - importar no início do main)
     if (result !== null) {
-
-      //buscar a os no banco pesquisando pelo valor do result (número da OS)
+      // Verificar se o ID é válido (uso do mongoose - não esquecer de importar)
       if (mongoose.Types.ObjectId.isValid(result)) {
         try {
-          // teste para ver se está funcionando
-          //console.log ("Lucas Doente")
+          // teste do botão imprimir
+          //console.log("imprimir OS")
           const dataOS = await osModel.findById(result)
-          if (dataOS) {
+          if (dataOS && dataOS !== null) {
             console.log(dataOS) // teste importante
-
-            // extrair os dados do cliente
+            // extrair os dados do cliente de acordo com o idCliente vinculado a OS
             const dataClient = await clientModel.find({
-              _id: dataOS.idCliente                
+              _id: dataOS.idCliente
             })
-            console.log(dataClient) 
+            console.log(dataClient)
+            // impressão (documento PDF) com os dados da OS, do cliente e termos do serviço (uso do jspdf)
 
-            // impressão (documento PDF) com os dados da Os, do cliente e termos do serviço (uso do jspdf)
+            // formatação do documento pdf
+            const doc = new jsPDF('p', 'mm', 'a4')
+            const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
+            const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
+            doc.addImage(imageBase64, 'PNG', 5, 8)
+            doc.setFontSize(18)
+            doc.text("OS:", 14, 45) //x=14, y=45
+            doc.setFontSize(12)
+
+            // Cabeçalho com dados do cliente (em linhas distintas)
+            // Cabeçalho - Dados do cliente em uma única linha (horizontal)
+            dataClient.forEach((c) => {
+              // Cliente
+              doc.setFont("helvetica", "bold");
+              doc.text("Cliente:", 14, 65);
+              doc.setFont("helvetica", "normal");
+              doc.text(c.nomeCliente, 35, 65);
+
+              // Telefone
+              doc.setFont("helvetica", "bold");
+              doc.text("Telefone:", 85, 65);
+              doc.setFont("helvetica", "normal");
+              doc.text(c.foneCliente, 110, 65);
+
+              // Email
+              doc.setFont("helvetica", "bold");
+              doc.text("Email:", 150, 65);
+              doc.setFont("helvetica", "normal");
+              doc.text(c.emailCliente || "N/A", 170, 65);
+            });
+
+
+            // Linha separadora logo abaixo
+            doc.line(14, 70, 200, 70); // linha horizontal de X=14 até X=200, na altura Y=70
+
+            let baseY = 90; // você pode ajustar conforme o layout anterior
+
+            // Modelo
+            doc.setFont("helvetica", "bold");
+            doc.text("Modelo:", 14, baseY);
+            doc.setFont("helvetica", "normal");
+            doc.text(String(dataOS.modelo), 50, baseY);
+            baseY += 10;
+
+            // Placa
+            doc.setFont("helvetica", "bold");
+            doc.text("Placa:", 14, baseY);
+            doc.setFont("helvetica", "normal");
+            doc.text(String(dataOS.placa), 50, baseY);
+            baseY += 10;
+
+            // Funcionário
+            doc.setFont("helvetica", "bold");
+            doc.text("Funcionário:", 14, baseY);
+            doc.setFont("helvetica", "normal");
+            doc.text(String(dataOS.funcionario), 50, baseY);
+            baseY += 10;
+
+            // Prazo
+            doc.setFont("helvetica", "bold");
+            doc.text("Prazo:", 14, baseY);
+            doc.setFont("helvetica", "normal");
+            doc.text(String(dataOS.prazo), 50, baseY);
+            baseY += 10;
+
+            // Valor
+            doc.setFont("helvetica", "bold");
+            doc.text("Valor:", 14, baseY);
+            doc.setFont("helvetica", "normal");
+            doc.text(String(dataOS.valor), 50, baseY);
+            baseY += 10;
+
+            // Serviço
+            doc.setFont("helvetica", "bold");
+            doc.text("Serviço:", 14, baseY);
+            doc.setFont("helvetica", "normal");
+            doc.text(String(dataOS.servico), 50, baseY);
+            baseY += 10;
+
+            // Observações
+            doc.setFont("helvetica", "bold");
+            doc.text("Observações:", 14, baseY);
+            doc.setFont("helvetica", "normal");
+            const obs = doc.splitTextToSize(String(dataOS.observacoes), 180);
+            doc.text(obs, 14, baseY + 8);
+
+            // Texto do termo de serviço
+            doc.setFontSize(8)
+            const termo = `
+  Termo de Serviço e Garantia
+  
+  O cliente autoriza a realização dos serviços técnicos descritos nesta ordem, ciente de que:
+  
+  - Diagnóstico e orçamento são gratuitos apenas se o serviço for aprovado. Caso contrário, poderá ser cobrada taxa de análise.
+  - Peças substituídas poderão ser retidas para descarte ou devolvidas mediante solicitação no ato do serviço.
+  - A garantia dos serviços prestados é de 90 dias, conforme Art. 26 do Código de Defesa do Consumidor, e cobre exclusivamente o reparo executado ou peça trocada, desde que o equipamento não tenha sido violado por terceiros.
+  - Não nos responsabilizamos por dados armazenados. Recomenda-se o backup prévio.
+  - Equipamentos não retirados em até 90 dias após a conclusão estarão sujeitos a cobrança de armazenagem ou descarte, conforme Art. 1.275 do Código Civil.
+  - O cliente declara estar ciente e de acordo com os termos acima.`
+
+            // Inserir o termo no PDF
+            doc.text(termo, 14, 150, { maxWidth: 180 }) // x=14, y=60, largura máxima para quebrar o texto automaticamente
+
+            // Definir o caminho do arquivo temporário e nome do arquivo
+            const tempDir = app.getPath('temp')
+            const filePath = path.join(tempDir, 'os.pdf')
+            // salvar temporariamente o arquivo
+            doc.save(filePath)
+            // abrir o arquivo no aplicativo padrão de leitura de pdf do computador do usuário
+            shell.openPath(filePath)
           } else {
             dialog.showMessageBox({
               type: 'warning',
@@ -1095,6 +1209,7 @@ ipcMain.on('print-os', (event) => {
               buttons: ['OK']
             })
           }
+
         } catch (error) {
           console.log(error)
         }
@@ -1102,7 +1217,7 @@ ipcMain.on('print-os', (event) => {
         dialog.showMessageBox({
           type: 'error',
           title: "Atenção!",
-          message: "Formato do número da OS inválido.\nVerifique e tente novamente.",
+          message: "Código da OS inválido.\nVerifique e tente novamente.",
           buttons: ['OK']
         })
       }
@@ -1110,6 +1225,133 @@ ipcMain.on('print-os', (event) => {
   })
 })
 
+async function printOS(osId) {
+  try {
+    const dataOS = await osModel.findById(osId)
 
-// ======================= Fim - IMPRIMIR OS ====================
-// ==============================================================
+    const dataClient = await clientModel.find({
+      _id: dataOS.idCliente
+    })
+    console.log(dataClient)
+    // impressão (documento PDF) com os dados da OS, do cliente e termos do serviço (uso do jspdf)
+
+    // formatação do documento pdf
+    const doc = new jsPDF('p', 'mm', 'a4')
+    const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
+    const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
+    doc.addImage(imageBase64, 'PNG', 5, 8)
+    doc.setFontSize(18)
+    doc.text("OS:", 14, 45) //x=14, y=45
+    doc.setFontSize(12)
+
+    // Cabeçalho com dados do cliente (em linhas distintas)
+    // Cabeçalho - Dados do cliente em uma única linha (horizontal)
+    dataClient.forEach((c) => {
+      // Cliente
+      doc.setFont("helvetica", "bold");
+      doc.text("Cliente:", 14, 65);
+      doc.setFont("helvetica", "normal");
+      doc.text(c.nomeCliente, 35, 65);
+
+      // Telefone
+      doc.setFont("helvetica", "bold");
+      doc.text("Telefone:", 85, 65);
+      doc.setFont("helvetica", "normal");
+      doc.text(c.foneCliente, 110, 65);
+
+      // Email
+      doc.setFont("helvetica", "bold");
+      doc.text("Email:", 150, 65);
+      doc.setFont("helvetica", "normal");
+      doc.text(c.emailCliente || "N/A", 170, 65);
+    });
+
+
+    // Linha separadora logo abaixo
+    doc.line(14, 70, 200, 70); // linha horizontal de X=14 até X=200, na altura Y=70
+
+    // Dados da OS em uma linha abaixo da separadora
+
+    let baseY = 90; // você pode ajustar conforme o layout anterior
+
+    // Modelo
+    doc.setFont("helvetica", "bold");
+    doc.text("Modelo:", 14, baseY);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(dataOS.modelo), 50, baseY);
+    baseY += 10;
+
+    // Placa
+    doc.setFont("helvetica", "bold");
+    doc.text("Placa:", 14, baseY);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(dataOS.placa), 50, baseY);
+    baseY += 10;
+
+    // Funcionário
+    doc.setFont("helvetica", "bold");
+    doc.text("Funcionário:", 14, baseY);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(dataOS.funcionario), 50, baseY);
+    baseY += 10;
+
+    // Prazo
+    doc.setFont("helvetica", "bold");
+    doc.text("Prazo:", 14, baseY);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(dataOS.prazo), 50, baseY);
+    baseY += 10;
+
+    // Valor
+    doc.setFont("helvetica", "bold");
+    doc.text("Valor:", 14, baseY);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(dataOS.valor), 50, baseY);
+    baseY += 10;
+
+    // Serviço
+    doc.setFont("helvetica", "bold");
+    doc.text("Serviço:", 14, baseY);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(dataOS.servico), 50, baseY);
+    baseY += 10;
+
+    // Observações
+    doc.setFont("helvetica", "bold");
+    doc.text("Observações:", 14, baseY);
+    doc.setFont("helvetica", "normal");
+    const obs = doc.splitTextToSize(String(dataOS.observacoes), 180);
+    doc.text(obs, 14, baseY + 8);
+
+    // Texto do termo de serviço
+    doc.setFontSize(8)
+    const termo = `
+Termo de Serviço e Garantia
+
+O cliente autoriza a realização dos serviços técnicos descritos nesta ordem, ciente de que:
+
+- Diagnóstico e orçamento são gratuitos apenas se o serviço for aprovado. Caso contrário, poderá ser cobrada taxa de análise.
+- Peças substituídas poderão ser retidas para descarte ou devolvidas mediante solicitação no ato do serviço.
+- A garantia dos serviços prestados é de 90 dias, conforme Art. 26 do Código de Defesa do Consumidor, e cobre exclusivamente o reparo executado ou peça trocada, desde que o equipamento não tenha sido violado por terceiros.
+- Não nos responsabilizamos por dados armazenados. Recomenda-se o backup prévio.
+- Equipamentos não retirados em até 90 dias após a conclusão estarão sujeitos a cobrança de armazenagem ou descarte, conforme Art. 1.275 do Código Civil.
+- O cliente declara estar ciente e de acordo com os termos acima.`
+
+    // Inserir o termo no PDF
+    doc.text(termo, 14, 150, { maxWidth: 180 }) // x=14, y=60, largura máxima para quebrar o texto automaticamente
+
+    // Definir o caminho do arquivo temporário e nome do arquivo
+    const tempDir = app.getPath('temp')
+    const filePath = path.join(tempDir, 'os.pdf')
+    // salvar temporariamente o arquivo
+    doc.save(filePath)
+    // abrir o arquivo no aplicativo padrão de leitura de pdf do computador do usuário
+    shell.openPath(filePath)
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// Fim - Impressão de OS ======================================
+// ============================================================
