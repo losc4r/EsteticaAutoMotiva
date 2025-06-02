@@ -2,55 +2,52 @@ console.log("Processo principal")
 
 const { app, BrowserWindow, nativeTheme, Menu, ipcMain, dialog, shell } = require('electron')
 
-// Esta linha está relacionada ao preload.js
+
 const path = require('node:path')
 
-// Importação dos métodos conectar e desconectar (módulo de conexão)
+
 const { conectar, desconectar } = require('./database.js')
 
-// importação do Schema Clientes da camada model
+
 const clientModel = require('./src/models/clientes.js')
 const cpfModel = require('./src/models/clientes.js')
 
-//Importação do modelo de dados do os
+
 const osModel = require("./src/models/os.js")
 
-// importação do pacote jspdf (npm i jspdf)
+
 const { jspdf, default: jsPDF } = require('jspdf')
 
-// importação do mongoose
+
 const mongoose = require('mongoose')
 
-// importação da biblioteca fs (nativa do javascript) para manipulação de arquivos
+
 const fs = require('fs')
 
-// Importação do recurso 'electron-prompt' (dialog de input)
-// 1º instalar o recurso: npm i electron-prompt
+
 const prompt = require('electron-prompt')
 
-// Janela principal
+
 let win
 const createWindow = () => {
-  // a linha abaixo define o tema (claro ou escuro)
-  nativeTheme.themeSource = 'light' //(dark ou light)
+
+  nativeTheme.themeSource = 'light'
   win = new BrowserWindow({
     width: 800,
     height: 600,
-    //autoHideMenuBar: true,
-    //minimizable: false,
+
     resizable: false,
-    //ativação do preload
+
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
   })
 
-  // menu personalizado
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 
   win.loadFile('./src/views/index.html')
 
-  // recebimento dos pedidos para abertura de janelas (botões) autorizado no preload.js
+ 
   ipcMain.on('client-window', () => {
     clientWindow()
   })
@@ -59,12 +56,12 @@ const createWindow = () => {
   })
 }
 
-// Janela Sobre
+
 function aboutWindow() {
   nativeTheme.themeSource = 'light'
-  // ↓ obtém a janela principal ↓
+ 
   const main = BrowserWindow.getFocusedWindow()
-  let about // ← estabelecer uma relação hierárquica entre janelas
+  let about 
   if (main) {
     about = new BrowserWindow({
       width: 360,
@@ -80,7 +77,7 @@ function aboutWindow() {
   about.loadFile('./src/views/sobre.html')
 }
 
-// JANELA CLIENTES
+
 
 let client
 function clientWindow() {
@@ -90,21 +87,21 @@ function clientWindow() {
     client = new BrowserWindow({
       width: 1020,
       height: 720,
-      //autoHideMenuBar: true,
+   
       resizable: false,
       parent: main,
       modal: true,
-      //ativação do preload.js
+     
       webPreferences: {
         preload: path.join(__dirname, 'preload.js')
       }
     })
   }
   client.loadFile('./src/views/clientes.html')
-  client.center() //inicar no centro da tela
+  client.center() 
 }
 
-// JANELA OS
+
 
 let os
 function osWindow() {
@@ -114,21 +111,21 @@ function osWindow() {
     os = new BrowserWindow({
       width: 1020,
       heigth: 1920,
-      //autoHideMenuBar: true,
+     
       resizable: false,
       parent: main,
       modal: true,
-      //ativação do preload.js
+      
       webPreferences: {
         preload: path.join(__dirname, 'preload.js')
       }
     })
   }
   os.loadFile('./src/views/os.html')
-  os.center() //inicar no centro da tela
+  os.center() 
 }
 
-// Iniciar a aplicação
+
 app.whenReady().then(() => {
   createWindow()
 
@@ -145,28 +142,28 @@ app.on('window-all-closed', () => {
   }
 })
 
-// reduzir logs não críticos
+
 app.commandLine.appendSwitch('log-level', '3')
 
-// iniciar a conexão com o banco de dados (pedido direto do preload.js)
+
 ipcMain.on('db-connect', async (event) => {
   let conectado = await conectar()
-  // se conectado for igual a true
+ 
   if (conectado) {
-    // enviar uma mensagem para o renderizador trocar o ícone
+   
     setTimeout(() => {
       event.reply('db-status', "conectado")
     }, 500)
   }
 })
 
-// IMPORTANTE! Desconectar do banco de dados quando a aplicação for encerrada
+
 app.on('before-quit', () => {
   desconectar()
 })
 
 
-// template do menu
+
 const template = [
   {
     label: 'Cadastro',
@@ -231,17 +228,6 @@ const template = [
         label: 'Restaurar o zoom padrão',
         role: 'resetZoom'
       },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Recarregar',
-        role: 'reload'
-      },
-      {
-        label: 'Ferramentas do Desenvolvedor',
-        role: 'toggleDevTools'
-      }
     ]
   },
   {
@@ -255,17 +241,13 @@ const template = [
   }
 ]
 
-// ==========================
-// == Clientes - CRUD Create
 
-// recebimento do objeto que contem os dados do cliente
 ipcMain.on('new-client', async (event, client) => {
-  // importante! teste de recebimento dos dados do cliente
+  
   console.log(client)
-  // cadastrar a estrutura de dados no banco de dados MongoDB
+  
   try {
-    // criar uma nova de estrtutra de dados usando a classe modelo
-    // Atenção os atributos precisam ser identicos ao modelo de dados Clientes.js e os valores são defifidos pelo conteúdo do objeto cliente
+    
     const newClient = new clientModel({
       nomeCliente: client.nameCli,
       cpfCliente: client.cpfCli,
@@ -279,24 +261,24 @@ ipcMain.on('new-client', async (event, client) => {
       cidadeCliente: client.cityClient,
       ufCliente: client.ufCli,
     })
-    // salvar os dados do cliente no banco de dados
+    
     await newClient.save()
-    // mensagem de confirmção
+    
     dialog.showMessageBox({
-      // customização
+      
       type: 'info',
       title: "Aviso",
       message: "Cliente adicionado com sucesso",
       buttons: ['OK']
     }).then((result) => {
-      // ação ao pressionar o botão
+      
       if (result.response === 0) {
-        // enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo) preload.js
+
         event.reply('reset-form')
       }
     })
   } catch (error) {
-    // se o código de erro for 11000 (cpf duplicado) enviar uma mensagem ao usuário
+    
     if (error.code === 11000) {
       dialog.showMessageBox({
         type: 'error',
@@ -310,58 +292,50 @@ ipcMain.on('new-client', async (event, client) => {
     console.log(error)
   }
 })
-// == Fim - Cliente - CRUD Create
-// =========== Relatório de Cliente ============
+
 
 async function relatorioClientes() {
   try {
-    // passo 1: consultar o banco de dados e obter a listagem de clientes cadastrados por ordem alfabetica
+    
     const clientes = await clientModel.find().sort({ nomeCliente: 1 })
 
-    // teste de recebimento da listagem de clientes
-    // console.log(clientes)
-    // Passo 2: Formatação do documento pdf
-    // p - portrait | l - landscape | mm e a4 (folha A4(210x297mm))
+    
     const doc = new jsPDF('p', 'mm', 'a4')
 
-    // inserir imagem no documento pdf
-    // imagePath (caminho da imagem que será inserida no pdf)
-    // imageBase 64 (usa da biblioteca fs para ler o arquivo no formato png)
+    
     const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
-    doc.addImage(imageBase64, 'PNG', 20, 8) //(5mm, 8mm x,y)
+    doc.addImage(imageBase64, 'PNG', 20, 8) 
 
-    // definir o tamanho da fonte
+    
     doc.setFontSize(18)
 
-    // escrever um texto (título)
-    doc.text("Relatório de Clientes", 14, 45)//x,y (mm) 
+    
+    doc.text("Relatório de Clientes", 14, 45) 
 
-    // inserir a data atual no relatório
+   
     const dataAtual = new Date().toLocaleDateString('pt-BR')
     doc.setFontSize(12)
     doc.text(`Data: ${dataAtual}`, 160, 10)
 
-    // variavel de apio na formatação
+    
     let y = 60
     doc.text("Nome", 14, y)
     doc.text("Telefone", 80, y)
     doc.text("E-mail", 130, y)
     y += 5
 
-    // desenhar linha
-    doc.setLineWidth(0.5) // expessura da linha
-    doc.line(10, y, 200, y) // inicio e fim
+    
+    doc.setLineWidth(0.5) 
+    doc.line(10, y, 200, y) 
 
-    //renderizar os clientes cadastrados no banco
-    y += 10 // espaçãmento da linha
-    // percorrer o vetor clientes (obtido do banco) usando o laço forEach (equivale ao laço for)
+    
+    y += 10 
     clientes.forEach((c) => {
-      // adicionar outra página se a folha inteira for preenchida (estratégia é saber o tamanho da folha)
+      
       if (y > 280) {
         doc.addPage()
-        y = 20 // resetar a variável y
-        // redesenhar o cabeçalho
+        y = 20 
         doc.text("Nome", 14, y)
         doc.text("Telefone", 80, y)
         doc.text("E-mail", 130, y)
@@ -373,10 +347,10 @@ async function relatorioClientes() {
       doc.text(c.nomeCliente, 14, y)
       doc.text(c.foneCliente, 80, y)
       doc.text(c.emailCliente || "N/A", 130, y)
-      y += 10 // quebra de linha
+      y += 10 
     })
 
-    // Adicionar numeração automatica de páginas
+    
     const paginas = doc.internal.getNumberOfPages()
     for (let i = 1; i <= paginas; i++) {
       doc.setPage(i)
@@ -384,14 +358,14 @@ async function relatorioClientes() {
       doc.text(`Página ${i} de ${paginas}`, 105, 290, { align: 'center' })
     }
 
-    // Definir o caminho do arquivo temporário e nome do arquivo
+    
     const tempDir = app.getPath('temp')
     const filePath = path.join(tempDir, 'clientes.pdf')
 
-    // salvar  temporariamente o arquivo
+    
     doc.save(filePath)
 
-    // abrir o arquivo no aplicativo padrão de leitura de pdf do computador do usuário
+    
     shell.openPath(filePath)
   } catch (error) {
     console.log(error)
@@ -399,11 +373,7 @@ async function relatorioClientes() {
 }
 
 
-// =========== FIM Relatório de Cliente =============
 
-// =========== CRUD READ ============================
-
-// validação de busca (preenchimento obrigatório)
 ipcMain.on('validate-search', () => {
   dialog.showMessageBox({
     type: 'warning',
@@ -414,11 +384,7 @@ ipcMain.on('validate-search', () => {
 })
 
 ipcMain.on('search-name', async (event, name) => {
-  //console.log("teste IPC search-name")
-  //console.log(name) // teste do passo 2 (importante)
-  // passo 3 e 4 busca dos dados do cliente do banco
-  // find ({nomeCliente: name}) - buscar pelo nome
-  // RegExp(name, i) - i (insensitive / ignorar maiusculo ou minusculo)
+  
   try {
     const dataClient = await clientModel.find({
       $or: [
@@ -426,24 +392,21 @@ ipcMain.on('search-name', async (event, name) => {
         { cpfCliente: new RegExp(name, 'i') }
       ]
     })
-    console.log(dataClient) // teste passos 3 e 4 (importante)
-    // melhoria da expriência do usuário (se o cliente não estiver cadastrado, alertar o usuário e questionar se ele quer cadastrar este novo cliente.Se não quiser cadastrar, limpar os campos, se quiser cadastrar recortar o nome do cliente do campo de busca e colar no campo nome)
-
-    // se o vetor estiver vazio [] (cliente não cadastrado)
+    console.log(dataClient)
     if (dataClient.length === 0) {
       dialog.showMessageBox({
         type: 'question',
         title: 'Aviso',
         message: "Cliente não cadastrado. \nDeseja cadastrar esse cliente?",
-        defaultId: 0, //botão 0
-        buttons: ['Sim', 'Não'] //[0,1]
+        defaultId: 0, 
+        buttons: ['Sim', 'Não'] 
 
       }).then((result) => {
         if (result.response === 0) {
-          // enviar ao renderizador um pedido para setar os campos(recortar do campo de busca e colar no campo nome
+          
           event.reply('set-client')
         } else {
-          // limpar formulario
+          
           event.reply('reset-form')
         }
 
@@ -451,33 +414,28 @@ ipcMain.on('search-name', async (event, name) => {
     }
 
 
-    // passo 5
-    // enviando os dados cliente ao rendererCliente
-    // OBS: IPC só trabalha com string, então é necessário converter o JSON para o string
+    
     event.reply('render-client', JSON.stringify(dataClient))
   } catch (error) {
     console.log(error)
   }
 })
 
-// =========== FIM CRUD READ ========================
 
-// =========== CRUD DELETE ==========================
 
 ipcMain.on('delete-client', async (event, id) => {
-  console.log(id) // teste do passo 2 (recebimento do id)
+  console.log(id) 
   try {
-    // importante- confirmar a exclusão
-    // client é o nome da variavel que representa a janela
+    
     const { response } = await dialog.showMessageBox(client, {
       type: 'warning',
       title: "Atenção!",
       message: "Deseja excluir este cliente? \nEsta ação não poderá ser desfeita",
-      buttons: ['Cancelar', 'Excluir'] //[0,1]
+      buttons: ['Cancelar', 'Excluir'] 
     })
     if (response === 1) {
 
-      // Passo 3 - Excluir o registro do cliente
+      
       const delClient = await clientModel.findByIdAndDelete(id)
       event.reply('reset-form')
     }
@@ -486,16 +444,13 @@ ipcMain.on('delete-client', async (event, id) => {
   }
 })
 
-// =========== FIM DO CRUD DELETE ===================
 
-// =========== CRUD UPDATE ===================
 
 ipcMain.on('update-client', async (event, client) => {
-  console.log(client) // teste importante dos recebimentos dos dados do cliente
+  console.log(client) 
   try {
 
-    // criar uma nova de estrtutra de dados usando a classe modelo
-    // Atenção os atributos precisam ser identicos ao modelo de dados Clientes.js e os valores são defifidos pelo conteúdo do objeto cliente
+    
     const updateClient = await clientModel.findByIdAndUpdate(
       client.idCli,
       {
@@ -515,18 +470,17 @@ ipcMain.on('update-client', async (event, client) => {
         new: true
       }
     )
-    // confirmação
-    // mensagem de confirmção
+    
     dialog.showMessageBox({
-      // customização
+      
       type: 'info',
       title: "Aviso",
       message: "Dados atualizados com sucesso",
       buttons: ['OK']
     }).then((result) => {
-      // ação ao pressionar o botão
+      
       if (result.response === 0) {
-        // enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo) preload.js
+        
         event.reply('reset-form')
       }
     })
@@ -534,16 +488,6 @@ ipcMain.on('update-client', async (event, client) => {
     console.log(error)
   }
 })
-
-// =========== FIM DO CRUD UPDATE ===================
-
-
-//************************************************************/
-//*******************  Ordem de Serviço  *********************/
-//************************************************************/
-
-
-//==================== RELATORIO OS ==============================/
 
 
 async function relatorioOSAbertas() {
@@ -555,11 +499,11 @@ async function relatorioOSAbertas() {
 
     const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
-    doc.addImage(imageBase64, 'PNG', 20, 8) //(5mm, 8mm x,y)
+    doc.addImage(imageBase64, 'PNG', 20, 8) 
 
     doc.setFontSize(18)
 
-    doc.text("Relatório de Ordem de Serviços", 14, 45)//x,y (mm) 
+    doc.text("Relatório de O.S em Aberto", 14, 45)
 
     const dataAtual = new Date().toLocaleDateString('pt-BR')
     doc.setFontSize(12)
@@ -572,10 +516,10 @@ async function relatorioOSAbertas() {
     doc.text("Prazo de Entrega", 165, y)
     y += 5
 
-    doc.setLineWidth(0.5) // expessura da linha
-    doc.line(10, y, 200, y) // inicio e fim
+    doc.setLineWidth(0.5) 
+    doc.line(10, y, 200, y) 
 
-    y += 10 // espaçãmento da linha
+    y += 10 
 
     clientes.forEach((c) => {
 
@@ -626,11 +570,11 @@ async function relatorioOSAndamento() {
 
     const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
-    doc.addImage(imageBase64, 'PNG', 20, 8) //(5mm, 8mm x,y)
+    doc.addImage(imageBase64, 'PNG', 20, 8) 
 
     doc.setFontSize(18)
 
-    doc.text("Relatório de Ordem de Serviços", 14, 45)//x,y (mm) 
+    doc.text("Relatório de Ordem de Serviços", 14, 45)
 
     const dataAtual = new Date().toLocaleDateString('pt-BR')
     doc.setFontSize(12)
@@ -643,10 +587,10 @@ async function relatorioOSAndamento() {
     doc.text("Prazo de Entrega", 165, y)
     y += 5
 
-    doc.setLineWidth(0.5) // expessura da linha
-    doc.line(10, y, 200, y) // inicio e fim
+    doc.setLineWidth(0.5) 
+    doc.line(10, y, 200, y) 
 
-    y += 10 // espaçãmento da linha
+    y += 10 
 
     clientes.forEach((c) => {
 
@@ -697,11 +641,11 @@ async function relatorioOSFinalizadas() {
 
     const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
-    doc.addImage(imageBase64, 'PNG', 20, 8) //(5mm, 8mm x,y)
+    doc.addImage(imageBase64, 'PNG', 20, 8) 
 
     doc.setFontSize(18)
 
-    doc.text("Relatório de Ordem de Serviços", 14, 45)//x,y (mm) 
+    doc.text("Relatório de O.S Finalizadas", 14, 45)
 
     const dataAtual = new Date().toLocaleDateString('pt-BR')
     doc.setFontSize(12)
@@ -714,10 +658,10 @@ async function relatorioOSFinalizadas() {
     doc.text("Prazo de Entrega", 165, y)
     y += 5
 
-    doc.setLineWidth(0.5) // expessura da linha
-    doc.line(10, y, 200, y) // inicio e fim
+    doc.setLineWidth(0.5) 
+    doc.line(10, y, 200, y) 
 
-    y += 10 // espaçãmento da linha
+    y += 10 
 
     clientes.forEach((c) => {
 
@@ -768,11 +712,11 @@ async function relatorioOSCanceladas() {
 
     const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
-    doc.addImage(imageBase64, 'PNG', 20, 8) //(5mm, 8mm x,y)
+    doc.addImage(imageBase64, 'PNG', 20, 8) 
 
     doc.setFontSize(18)
 
-    doc.text("Relatório de Ordem de Serviços", 14, 45)//x,y (mm) 
+    doc.text("Relatório de Ordem de Serviços", 14, 45)
 
     const dataAtual = new Date().toLocaleDateString('pt-BR')
     doc.setFontSize(12)
@@ -785,10 +729,10 @@ async function relatorioOSCanceladas() {
     doc.text("Prazo de Entrega", 165, y)
     y += 5
 
-    doc.setLineWidth(0.5) // expessura da linha
-    doc.line(10, y, 200, y) // inicio e fim
+    doc.setLineWidth(0.5) 
+    doc.line(10, y, 200, y) 
 
-    y += 10 // espaçãmento da linha
+    y += 10 
 
     clientes.forEach((c) => {
 
@@ -831,20 +775,19 @@ async function relatorioOSCanceladas() {
 }
 
 
-// =============================== FIM RELATORIO OS =======================================
 
 
 
-// ================ Buscar Cliente para vincular na OS estilo GOOGLE =================
+
+
 
 ipcMain.on('search-clients', async (event) => {
   try {
-    // Buscar clientes no banco em ordem alfabética pelo nome
+    
     const clientes = await clientModel.find().sort({ nomeCliente: 1 })
-    //console.log(clientes) // teste do passo 2
+    
 
-    // passo 3: Envio dos clientes para o renderizador
-    // obs: não esquecer de converter para String
+    
     event.reply('list-clients', JSON.stringify(clientes))
 
   } catch (error) {
@@ -853,12 +796,7 @@ ipcMain.on('search-clients', async (event) => {
 })
 
 
-// ================ FIM BUSCAR CLIENTE PELA OS =======================
 
-// ============================================================
-// == CRUD Create - Gerar OS ==================================
-
-// Validação de busca (preenchimento obrigatório Id Cliente-OS)
 ipcMain.on('validate-client', (event) => {
   dialog.showMessageBox({
     type: 'warning',
@@ -866,7 +804,7 @@ ipcMain.on('validate-client', (event) => {
     message: "É obrigatório vincular o cliente na Ordem de Serviço",
     buttons: ['OK']
   }).then((result) => {
-    //ação ao pressionar o botão (result = 0)
+    
     if (result.response === 0) {
       event.reply('set-search')
     }
@@ -874,11 +812,11 @@ ipcMain.on('validate-client', (event) => {
 })
 
 ipcMain.on('new-os', async (event, os) => {
-  //importante! teste de recebimento dos dados da os (passo 2)
+  
   console.log(os)
-  // Cadastrar a estrutura de dados no banco de dados MongoDB
+  
   try {
-    // criar uma nova de estrutura de dados usando a classe modelo. Atenção! Os atributos precisam ser idênticos ao modelo de dados OS.js e os valores são definidos pelo conteúdo do objeto os
+    
     const newOS = new osModel({
       idCliente: os.idClientOS,
       nome: os.nome_OS,
@@ -894,29 +832,29 @@ ipcMain.on('new-os', async (event, os) => {
       observacoes: os.observacoes_OS,
       valor: os.valor_OS
     })
-    // salvar os dados da OS no banco de dados
+    
     await newOS.save()
 
-    // Obter o ID gerado automaticamente pelo MongoDB
+    
     const osId = newOS._id
     console.log("ID da nova OS:", osId)
 
-    // Mensagem de confirmação
+    
     dialog.showMessageBox({
-      //customização
+      
       type: 'info',
       title: "Aviso",
       message: "OS gerada com sucesso.\nDeseja imprimir esta OS?",
-      buttons: ['Sim', 'Não'] // [0, 1]
+      buttons: ['Sim', 'Não'] 
     }).then((result) => {
-      //ação ao pressionar o botão (result = 0)
+      
       if (result.response === 0) {
-        // executar a função printOS passando o id da OS como parâmetro
+        
         printOS(osId)
-        //enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo 'reset-form' do preload.js
+        
         event.reply('reset-form')
       } else {
-        //enviar um pedido para o renderizador limpar os campos e resetar as configurações pré definidas (rótulo 'reset-form' do preload.js
+        
         event.reply('reset-form')
       }
     })
@@ -925,15 +863,9 @@ ipcMain.on('new-os', async (event, os) => {
   }
 })
 
-// == Fim - CRUD Create - Gerar OS ===========================
-// ============================================================
-
-
-// ============================================================
-// == Buscar OS ===============================================
 
 ipcMain.on('search-os', (event) => {
-  //console.log("teste: busca OS")
+  
   prompt({
     title: 'Buscar OS',
     label: 'Digite o número da OS:',
@@ -946,14 +878,12 @@ ipcMain.on('search-os', (event) => {
   }).then(async (result) => {
     if (result !== null) {
 
-      //buscar a os no banco pesquisando pelo valor do result (número da OS)
+      
       if (mongoose.Types.ObjectId.isValid(result)) {
         try {
           const dataOS = await osModel.findById(result)
           if (dataOS) {
-            console.log(dataOS) // teste importante
-            // enviando os dados da OS ao rendererOS
-            // OBS: IPC só trabalha com string, então é necessário converter o JSON para string JSON.stringify(dataOS)
+            console.log(dataOS)
             event.reply('render-os', JSON.stringify(dataOS))
           } else {
             dialog.showMessageBox({
@@ -979,27 +909,20 @@ ipcMain.on('search-os', (event) => {
 })
 
 
-// == Fim - Buscar OS =========================================
-// ============================================================
 
-
-// ============================================================
-// == Excluir OS - CRUD Delete  ===============================
 
 ipcMain.on('delete-os', async (event, idOS) => {
-  console.log(idOS) // teste do passo 2 (recebimento do id)
+  console.log(idOS) 
   try {
-    //importante - confirmar a exclusão
-    //osScreen é o nome da variável que representa a janela OS
+    
     const { response } = await dialog.showMessageBox(os, {
       type: 'warning',
       title: "Atenção!",
       message: "Deseja excluir esta ordem de serviço?\nEsta ação não poderá ser desfeita.",
-      buttons: ['Cancelar', 'Excluir'] //[0, 1]
+      buttons: ['Cancelar', 'Excluir'] 
     })
     if (response === 1) {
-      //console.log("teste do if de excluir")
-      //Passo 3 - Excluir a OS
+      
       const delOS = await osModel.findByIdAndDelete(idOS)
       event.reply('reset-form')
     }
@@ -1008,19 +931,14 @@ ipcMain.on('delete-os', async (event, idOS) => {
   }
 })
 
-// == Fim Excluir OS - CRUD Delete ============================
-// ============================================================
 
-
-// ============================================================
-// == Editar OS - CRUD Update =================================
 
 ipcMain.on('update-os', async (event, os) => {
-  console.log(os); // Verifique se os dados estão corretos
+  console.log(os);
 
   try {
     const updateOS = await osModel.findByIdAndUpdate(
-      os._id, // ou os.id, dependendo de como você está passando do frontend
+      os._id, 
       {
         idCliente: os.idCliente,
         nome: os.nome,
@@ -1055,14 +973,9 @@ ipcMain.on('update-os', async (event, os) => {
   }
 });
 
-// == Fim Editar OS - CRUD Update =============================
-// ============================================================
 
 
-// ============================================================
-// Impressão de OS ============================================
 
-// impressão via botão imprimir
 ipcMain.on('print-os', async (event) => {
   prompt({
     title: 'Imprimir OS',
@@ -1074,48 +987,43 @@ ipcMain.on('print-os', async (event) => {
     width: 400,
     height: 200
   }).then(async (result) => {
-    // buscar OS pelo id (verificar formato usando o mongoose - importar no início do main)
+    
     if (result !== null) {
-      // Verificar se o ID é válido (uso do mongoose - não esquecer de importar)
+      
       if (mongoose.Types.ObjectId.isValid(result)) {
         try {
-          // teste do botão imprimir
-          //console.log("imprimir OS")
+          
           const dataOS = await osModel.findById(result)
           if (dataOS && dataOS !== null) {
-            console.log(dataOS) // teste importante
-            // extrair os dados do cliente de acordo com o idCliente vinculado a OS
+            console.log(dataOS) 
             const dataClient = await clientModel.find({
               _id: dataOS.idCliente
             })
             console.log(dataClient)
-            // impressão (documento PDF) com os dados da OS, do cliente e termos do serviço (uso do jspdf)
-
-            // formatação do documento pdf
+            
             const doc = new jsPDF('p', 'mm', 'a4')
             const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
             const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
             doc.addImage(imageBase64, 'PNG', 5, 8)
             doc.setFontSize(18)
-            doc.text("OS:", 14, 45) //x=14, y=45
+            doc.text("OS:", 14, 45) 
             doc.setFontSize(12)
 
-            // Cabeçalho com dados do cliente (em linhas distintas)
-            // Cabeçalho - Dados do cliente em uma única linha (horizontal)
+            
             dataClient.forEach((c) => {
-              // Cliente
+              
               doc.setFont("helvetica", "bold");
               doc.text("Cliente:", 14, 65);
               doc.setFont("helvetica", "normal");
               doc.text(c.nomeCliente, 35, 65);
 
-              // Telefone
+              
               doc.setFont("helvetica", "bold");
               doc.text("Telefone:", 85, 65);
               doc.setFont("helvetica", "normal");
               doc.text(c.foneCliente, 110, 65);
 
-              // Email
+              
               doc.setFont("helvetica", "bold");
               doc.text("Email:", 150, 65);
               doc.setFont("helvetica", "normal");
@@ -1123,83 +1031,85 @@ ipcMain.on('print-os', async (event) => {
             });
 
 
-            // Linha separadora logo abaixo
-            doc.line(14, 70, 200, 70); // linha horizontal de X=14 até X=200, na altura Y=70
+            
+            doc.line(14, 70, 200, 70); 
 
-            let baseY = 90; // você pode ajustar conforme o layout anterior
+            let baseY = 90; 
 
-            // Modelo
+            
             doc.setFont("helvetica", "bold");
             doc.text("Modelo:", 14, baseY);
             doc.setFont("helvetica", "normal");
             doc.text(String(dataOS.modelo), 50, baseY);
             baseY += 10;
 
-            // Placa
+            
             doc.setFont("helvetica", "bold");
             doc.text("Placa:", 14, baseY);
             doc.setFont("helvetica", "normal");
             doc.text(String(dataOS.placa), 50, baseY);
             baseY += 10;
 
-            // Funcionário
             doc.setFont("helvetica", "bold");
             doc.text("Funcionário:", 14, baseY);
             doc.setFont("helvetica", "normal");
             doc.text(String(dataOS.funcionario), 50, baseY);
             baseY += 10;
 
-            // Prazo
+       
             doc.setFont("helvetica", "bold");
             doc.text("Prazo:", 14, baseY);
             doc.setFont("helvetica", "normal");
             doc.text(String(dataOS.prazo), 50, baseY);
             baseY += 10;
 
-            // Valor
+            
             doc.setFont("helvetica", "bold");
             doc.text("Valor:", 14, baseY);
             doc.setFont("helvetica", "normal");
             doc.text(String(dataOS.valor), 50, baseY);
             baseY += 10;
 
-            // Serviço
+            
             doc.setFont("helvetica", "bold");
             doc.text("Serviço:", 14, baseY);
             doc.setFont("helvetica", "normal");
             doc.text(String(dataOS.servico), 50, baseY);
             baseY += 10;
 
-            // Observações
-            doc.setFont("helvetica", "bold");
-            doc.text("Observações:", 14, baseY);
-            doc.setFont("helvetica", "normal");
-            const obs = doc.splitTextToSize(String(dataOS.observacoes), 180);
-            doc.text(obs, 14, baseY + 8);
+          
+doc.setFont("helvetica", "bold");
+doc.setFontSize(10);
+doc.text("Observações:", 14, baseY);
 
-            // Texto do termo de serviço
+doc.setFont("helvetica", "normal");
+doc.setFontSize(8);
+
+           
             doc.setFontSize(8)
             const termo = `
-  Termo de Serviço e Garantia
-  
-  O cliente autoriza a realização dos serviços técnicos descritos nesta ordem, ciente de que:
-  
-  - Diagnóstico e orçamento são gratuitos apenas se o serviço for aprovado. Caso contrário, poderá ser cobrada taxa de análise.
-  - Peças substituídas poderão ser retidas para descarte ou devolvidas mediante solicitação no ato do serviço.
-  - A garantia dos serviços prestados é de 90 dias, conforme Art. 26 do Código de Defesa do Consumidor, e cobre exclusivamente o reparo executado ou peça trocada, desde que o equipamento não tenha sido violado por terceiros.
-  - Não nos responsabilizamos por dados armazenados. Recomenda-se o backup prévio.
-  - Equipamentos não retirados em até 90 dias após a conclusão estarão sujeitos a cobrança de armazenagem ou descarte, conforme Art. 1.275 do Código Civil.
-  - O cliente declara estar ciente e de acordo com os termos acima.`
+Termo de Serviço e Garantia – Estética Automotiva
+O cliente autoriza a execução dos serviços automotivos descritos nesta ordem, estando ciente de que:
 
-            // Inserir o termo no PDF
-            doc.text(termo, 14, 150, { maxWidth: 180 }) // x=14, y=60, largura máxima para quebrar o texto automaticamente
+O diagnóstico e orçamento são gratuitos apenas mediante aprovação do serviço. Em caso de recusa, poderá ser cobrada uma taxa de avaliação técnica.
 
-            // Definir o caminho do arquivo temporário e nome do arquivo
+Produtos e materiais utilizados no serviço poderão ser descartados ou devolvidos ao cliente caso solicitado no ato do atendimento.
+
+A garantia dos serviços prestados é de 90 dias, conforme o Art. 26 do Código de Defesa do Consumidor, e cobre exclusivamente o serviço executado ou produto aplicado, desde que o veículo não tenha sido submetido a intervenções de terceiros ou uso indevido.
+
+Não nos responsabilizamos por itens pessoais deixados no interior do veículo. É recomendável a retirada de objetos antes da realização dos serviços.
+
+Veículos não retirados em até 90 dias após a conclusão dos serviços estarão sujeitos à cobrança de taxa de permanência ou destinação adequada, conforme o Art. 1.275 do Código Civil.
+
+O cliente declara estar ciente e de acordo com todos os termos acima descritos.`
+
+            
+            doc.text(termo, 14, 150, { maxWidth: 180 }) 
             const tempDir = app.getPath('temp')
             const filePath = path.join(tempDir, 'os.pdf')
-            // salvar temporariamente o arquivo
+            
             doc.save(filePath)
-            // abrir o arquivo no aplicativo padrão de leitura de pdf do computador do usuário
+            
             shell.openPath(filePath)
           } else {
             dialog.showMessageBox({
@@ -1233,33 +1143,30 @@ async function printOS(osId) {
       _id: dataOS.idCliente
     })
     console.log(dataClient)
-    // impressão (documento PDF) com os dados da OS, do cliente e termos do serviço (uso do jspdf)
-
-    // formatação do documento pdf
+    
     const doc = new jsPDF('p', 'mm', 'a4')
     const imagePath = path.join(__dirname, 'src', 'public', 'img', 'logo.png')
     const imageBase64 = fs.readFileSync(imagePath, { encoding: 'base64' })
     doc.addImage(imageBase64, 'PNG', 5, 8)
     doc.setFontSize(18)
-    doc.text("OS:", 14, 45) //x=14, y=45
+    doc.text("OS:", 14, 45) 
     doc.setFontSize(12)
 
-    // Cabeçalho com dados do cliente (em linhas distintas)
-    // Cabeçalho - Dados do cliente em uma única linha (horizontal)
+    
     dataClient.forEach((c) => {
-      // Cliente
+      
       doc.setFont("helvetica", "bold");
       doc.text("Cliente:", 14, 65);
       doc.setFont("helvetica", "normal");
       doc.text(c.nomeCliente, 35, 65);
 
-      // Telefone
+      
       doc.setFont("helvetica", "bold");
       doc.text("Telefone:", 85, 65);
       doc.setFont("helvetica", "normal");
       doc.text(c.foneCliente, 110, 65);
 
-      // Email
+      
       doc.setFont("helvetica", "bold");
       doc.text("Email:", 150, 65);
       doc.setFont("helvetica", "normal");
@@ -1267,91 +1174,93 @@ async function printOS(osId) {
     });
 
 
-    // Linha separadora logo abaixo
-    doc.line(14, 70, 200, 70); // linha horizontal de X=14 até X=200, na altura Y=70
+    
+    doc.line(14, 70, 200, 70); 
 
-    // Dados da OS em uma linha abaixo da separadora
+    
+    let baseY = 90; 
 
-    let baseY = 90; // você pode ajustar conforme o layout anterior
-
-    // Modelo
+    
     doc.setFont("helvetica", "bold");
     doc.text("Modelo:", 14, baseY);
     doc.setFont("helvetica", "normal");
     doc.text(String(dataOS.modelo), 50, baseY);
     baseY += 10;
 
-    // Placa
+    
     doc.setFont("helvetica", "bold");
     doc.text("Placa:", 14, baseY);
     doc.setFont("helvetica", "normal");
     doc.text(String(dataOS.placa), 50, baseY);
     baseY += 10;
 
-    // Funcionário
+   
     doc.setFont("helvetica", "bold");
     doc.text("Funcionário:", 14, baseY);
     doc.setFont("helvetica", "normal");
     doc.text(String(dataOS.funcionario), 50, baseY);
     baseY += 10;
 
-    // Prazo
+    
     doc.setFont("helvetica", "bold");
     doc.text("Prazo:", 14, baseY);
     doc.setFont("helvetica", "normal");
     doc.text(String(dataOS.prazo), 50, baseY);
     baseY += 10;
 
-    // Valor
+    
     doc.setFont("helvetica", "bold");
     doc.text("Valor:", 14, baseY);
     doc.setFont("helvetica", "normal");
     doc.text(String(dataOS.valor), 50, baseY);
     baseY += 10;
 
-    // Serviço
+    
     doc.setFont("helvetica", "bold");
     doc.text("Serviço:", 14, baseY);
     doc.setFont("helvetica", "normal");
     doc.text(String(dataOS.servico), 50, baseY);
     baseY += 10;
 
-    // Observações
-    doc.setFont("helvetica", "bold");
-    doc.text("Observações:", 14, baseY);
-    doc.setFont("helvetica", "normal");
-    const obs = doc.splitTextToSize(String(dataOS.observacoes), 180);
-    doc.text(obs, 14, baseY + 8);
+    
 
-    // Texto do termo de serviço
+doc.setFont("helvetica", "bold");
+doc.setFontSize(10);
+doc.text("Observações:", 14, baseY);
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(8);
+
+    
     doc.setFontSize(8)
     const termo = `
-Termo de Serviço e Garantia
+Termo de Serviço e Garantia – Estética Automotiva
+O cliente autoriza a execução dos serviços automotivos descritos nesta ordem, estando ciente de que:
 
-O cliente autoriza a realização dos serviços técnicos descritos nesta ordem, ciente de que:
+O diagnóstico e orçamento são gratuitos apenas mediante aprovação do serviço. Em caso de recusa, poderá ser cobrada uma taxa de avaliação técnica.
 
-- Diagnóstico e orçamento são gratuitos apenas se o serviço for aprovado. Caso contrário, poderá ser cobrada taxa de análise.
-- Peças substituídas poderão ser retidas para descarte ou devolvidas mediante solicitação no ato do serviço.
-- A garantia dos serviços prestados é de 90 dias, conforme Art. 26 do Código de Defesa do Consumidor, e cobre exclusivamente o reparo executado ou peça trocada, desde que o equipamento não tenha sido violado por terceiros.
-- Não nos responsabilizamos por dados armazenados. Recomenda-se o backup prévio.
-- Equipamentos não retirados em até 90 dias após a conclusão estarão sujeitos a cobrança de armazenagem ou descarte, conforme Art. 1.275 do Código Civil.
-- O cliente declara estar ciente e de acordo com os termos acima.`
+Produtos e materiais utilizados no serviço poderão ser descartados ou devolvidos ao cliente caso solicitado no ato do atendimento.
 
-    // Inserir o termo no PDF
-    doc.text(termo, 14, 150, { maxWidth: 180 }) // x=14, y=60, largura máxima para quebrar o texto automaticamente
+A garantia dos serviços prestados é de 90 dias, conforme o Art. 26 do Código de Defesa do Consumidor, e cobre exclusivamente o serviço executado ou produto aplicado, desde que o veículo não tenha sido submetido a intervenções de terceiros ou uso indevido.
 
-    // Definir o caminho do arquivo temporário e nome do arquivo
+Não nos responsabilizamos por itens pessoais deixados no interior do veículo. É recomendável a retirada de objetos antes da realização dos serviços.
+
+Veículos não retirados em até 90 dias após a conclusão dos serviços estarão sujeitos à cobrança de taxa de permanência ou destinação adequada, conforme o Art. 1.275 do Código Civil.
+
+O cliente declara estar ciente e de acordo com todos os termos acima descritos.`
+
+    
+    doc.text(termo, 14, 150, { maxWidth: 180 })
+
+    
     const tempDir = app.getPath('temp')
     const filePath = path.join(tempDir, 'os.pdf')
-    // salvar temporariamente o arquivo
+    
     doc.save(filePath)
-    // abrir o arquivo no aplicativo padrão de leitura de pdf do computador do usuário
+    
     shell.openPath(filePath)
 
   } catch (error) {
     console.log(error)
   }
 }
-
-// Fim - Impressão de OS ======================================
-// ============================================================

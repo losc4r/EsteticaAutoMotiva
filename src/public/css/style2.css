@@ -2,7 +2,7 @@ body {
     background-color: aliceblue;
 }
 
-/* Botão reset */
+
 #btnReset {
     width: 24px;
     height: 24px;
@@ -12,12 +12,12 @@ body {
     margin-left: 10px;
 }
 
-/* Ocultar o campo Id do cliente */
+
 #idClient {
     display: none;
 }
 
-/* lista de clientes vinculados a OS */
+
 #viewListSuggestion {
     z-index: 2;
     max-width: 382px;

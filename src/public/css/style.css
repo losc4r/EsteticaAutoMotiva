@@ -1,6 +1,6 @@
 @charset "utf-8";
 
-/* Botões (tela principal) */
+
 .button img {
     margin: 80px 10px 25px 10px;
     padding: 5px;
@@ -11,7 +11,7 @@
     
 }
 
-/* Logo */
+
 #logo1 {
     border: none;
     cursor: none;
@@ -23,7 +23,7 @@
     transform: translate(-50%, -50%);
 }
 
-/* Botão reset */
+
 #btnReset {
     width: 24px;
     height: 24px;
@@ -33,12 +33,12 @@
     margin-left: 10px;
 }
 
-/* Ocultar o campo Id do cliente */
+
 #idCliente {
     display: none;
 }
 
-/* Rodapé */
+
 footer {
     background-color: #003c80;
     width: 100%;
@@ -75,7 +75,7 @@ body {
     align-items: center;
 }
 
-/* lista de clientes vinculados a OS */
+
 #viewListSuggestion {
     z-index: 0;
     max-width: 382px;

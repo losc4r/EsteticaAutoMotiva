@@ -1,12 +1,7 @@
-/**
- * Modelo de dados para construção das coleções ("Tabelas")
- * Clientes
- */
 
-// importação dos recurso do framework mongoose
 const { model, Schema } = require('mongoose')
 
-// criação da estrutura da coleção clientes
+
 const clienteSchema = new Schema({
     nomeCliente: {
         type: String
@@ -54,9 +49,8 @@ const clienteSchema = new Schema({
         type: String,
     }
 
-}, { versionkey: false }) // não versionar os dados armazenados
+}, { versionkey: false }) 
 
-// exportar para o main o modelo de dados
-// OBS: Clientes será o nome da coleçãoF
+
 
 module.exports = model('Clientes', clienteSchema)
