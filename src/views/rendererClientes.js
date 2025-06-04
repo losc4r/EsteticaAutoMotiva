@@ -87,7 +87,7 @@ frmClient.addEventListener('submit', async (event) => {
       ufCli: ufClient.value
     }
     
-    api.updateClient(client)
+    api.newClient(client)
 
   } else {
     
